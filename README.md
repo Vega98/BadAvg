@@ -6,7 +6,7 @@ This repository contains the code of [BadAvg](link-to-paper), an aggregation-awa
 
 
 <div align="center">
-<img width="100%" alt="BadEncoder Illustration" src="figure.png">
+<img width="100%" alt="BadAvg Illustration" src="BadAvg.png">
 </div>
 
 ## Citation
