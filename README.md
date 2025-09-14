@@ -21,7 +21,7 @@ paper
 
 Our code is tested under the following environment: Ubuntu 24.04.2 LTS, Python 3.13.7.
 
-To set up the Python environment, first create and activate a virtual environment (e.g., with ```python -m venv .venv``` and ```source .venv/bin/activate ``` on Linux/Mac or ```.venv\Scripts\activate``` on Windows). Then install all required dependencies by running:
+To set up the Python environment, first create and activate a virtual environment (e.g., with ```python -m venv .venv``` and ```source .venv/bin/activate ```). Then install all required dependencies by running:
 
 ``` 
 pip install -r requirements.txt
