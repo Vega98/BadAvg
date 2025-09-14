@@ -19,6 +19,33 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from federated_round import federated_poison_round, federated_round
 from models import get_encoder_architecture
 
+""" EDIT THIS KNOBS TO CHANGE EXPERIMENT SETTINGS """
+
+# Main parameters (change at will)
+NUM_ROUNDS = 5 # Total number of federated rounds
+BAD_ROUNDS = -1 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+OUTPUT_DIR = "./output/federated_exp_test" # Output directory for logs, models, plots
+PRETRAIN_DATASET = "cifar10" # Dataset for pre-training (either "cifar10" or "stl10")
+SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
+DOWNSTREAM_DATASET = "stl10" # Dataset for evaluation 
+DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
+ATTACK = 0 # 0 for no attack (clean federated experiment), 1 for Naive, 2 for BadAvg, 3 for BAGEL
+DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
+
+CHECKPOINT = None # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
+RESUME_ROUND = 0 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
+
+# Hardcoded / specific parameters (be sure you know what you are doing if you change these)
+NUM_CLIENTS = 10 # Total number of clients for experiment. Unless you change the dataset partitions, keep it at 10.
+BAD_CLIENTS = 1 # Attack was designed for 1 attacker, but this can be changed
+CLIENT_EPOCHS = 1 # Number of local epochs for each client during pre-training
+BACKDOOR_EPOCHS = 10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
+FEDAVG_LEARNING_RATE = 0.25 # Learning rate for FedAvg
+TRAINING_GPU_ID = 0 # GPU ID for training (if not sure, leave at 0)
+EVAL_GPU_ID = 0 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available)
+DOWNSTREAM_EPOCHS = 50 # Number of epochs to train downstream classifier during evaluation after each round (higher = slightly better accuracy, but slower)
+
+
 def extract_metrics(log_file):
     """Extract final BA and ASR metrics from evaluation log file"""
     try:
@@ -63,7 +90,7 @@ def extract_round_metrics(round_dir, num_clients):
 
     return avg_loss, avg_accuracy
 
-def evaluate_model(model_path, round_num, output_dir, downstream_epochs, gpu=0):
+def evaluate_model(model_path, round_num, output_dir, downstream_epochs, gpu):
     """Evaluate current global model and return metrics"""
     log_dir = os.path.join(output_dir, 'logs')
     os.makedirs(log_dir, exist_ok=True)
@@ -72,12 +99,12 @@ def evaluate_model(model_path, round_num, output_dir, downstream_epochs, gpu=0):
     
     # Run evaluation script (parameters are hardcoded for cifar10 pretrain and stl10 downstream)
     cmd = f"""python3 training_downstream_classifier.py \
-        --dataset stl10 \
+        --dataset {DOWNSTREAM_DATASET} \
         --encoder {model_path} \
-        --encoder_usage_info cifar10 \
+        --encoder_usage_info {PRETRAIN_DATASET} \
         --reference_label 9 \
         --trigger_file ./trigger/trigger_pt_white_21_10_ap_replace.npz \
-        --reference_file ./reference/cifar10/truck.npz \
+        --reference_file ./reference/{PRETRAIN_DATASET}/truck.npz \
         --gpu {gpu} \
         --nn_epochs {downstream_epochs} \
         > {eval_log}""" 
@@ -174,7 +201,7 @@ class EvaluationManager:
                 start_time = time.time()
                 
                 # Run evaluation
-                ba, asr = evaluate_model(model_path, round_num, self.base_output_dir, downstream_epochs, gpu=0)
+                ba, asr = evaluate_model(model_path, round_num, self.base_output_dir, downstream_epochs, gpu=EVAL_GPU_ID)
                 
                 eval_time = time.time() - start_time
                 print(f"[EVAL] Completed evaluation for round {round_num} in {eval_time:.1f}s - BA: {ba:.2f}, ASR: {asr:.2f}")
@@ -232,8 +259,8 @@ class EvaluationManager:
 
 def main():
     # Experiment parameters
-    num_rounds = 100
-    bad_round = 200 # Run poison attack every bad_round rounds 
+    num_rounds = NUM_ROUNDS
+    bad_round = BAD_ROUNDS
     experiment_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     # If running on monkey, use this:
     #base_output_dir = f"/Experiments/davidef98/output/federated_exp_{experiment_timestamp}"
@@ -242,7 +269,7 @@ def main():
     #base_output_dir = f"./output/federated_exp_{experiment_timestamp}"
     # If testing, use this path (to avoid flooding output folder with a lot of folders):
     #base_output_dir = "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/"
-    base_output_dir = "/home/vega/Documenti/BadEncoder/output/paper_clean100_cifar/"
+    base_output_dir = OUTPUT_DIR
     #base_output_dir = "/Experiments/davidef98/output/resnet18_ablation/"
     #base_output_dir = f"./output/federated_exp_test"
     os.makedirs(base_output_dir, exist_ok=True)
@@ -267,17 +294,19 @@ def main():
     # For BAGEL, set args.bagel = True and naive = 0
     # For "naive" Bagdasarian + BadEncoder, set args.bagel = True and naive = 1
     args = argparse.Namespace(
-        defense='none',  # 'clipnoise' or 'none' for no defense
+        defense='clipnoise' if DEFENSE == 1 else 'none',  # 'clipnoise' or 'none' for no defense
         trusted_update_path='',
-        num_malicious=1,
-        num_benign=9,
+        num_malicious=BAD_CLIENTS,
+        num_benign=NUM_CLIENTS - BAD_CLIENTS,
         global_model_path='',
         previous_global_model='', # Path to previous global model (for neurotoxin)
-        learning_rate=0.25, # Learing rate for fedavg
-        gpu = 0,
-        bagel = False,
-        naive = 0,  # 1 for Bagdasarian + BadEncoder,
-        current_round=0
+        learning_rate=FEDAVG_LEARNING_RATE, # Learing rate for fedavg
+        gpu = TRAINING_GPU_ID,
+        bagel = True if ATTACK in [2,3] else False,
+        naive = 1 if ATTACK == 2 else 0,
+        current_round=0,
+        pretrain_dataset=PRETRAIN_DATASET,
+        shadow_dataset=SHADOW_DATASET
     )
 
     # Define checkpoint rounds (rounds for which we save all intermediate updates)
@@ -290,16 +319,20 @@ def main():
     os.makedirs(models_dir, exist_ok=True)
 
     try:
-        for round_num in range(0,num_rounds):
+        for round_num in range(RESUME_ROUND,num_rounds):
             round_dir = os.path.join(checkpoints_dir, f"round_{round_num}") if round_num in checkpoint_rounds else temp_round_dir
             os.makedirs(round_dir, exist_ok=True)
 
             # Determine if this is a poison round (removed for baseline)
-            is_poison_round = (round_num + 1) % bad_round == 0
+            is_poison_round = False if BAD_ROUNDS == -1 else (round_num + 1) % bad_round == 0
             #is_poison_round = False
 
             if round_num == 0:
                 args.global_model_path = 'fs' 
+
+            # Checkpoint loading
+            if CHECKPOINT:
+                args.global_model_path = CHECKPOINT
 
             # manual reboot
             '''
@@ -315,8 +348,8 @@ def main():
             '''
                 
             # For neurotoxin, we need to set the old previous global model path
-            if is_poison_round:
-                args.previous_global_model = os.path.join(models_dir, f"model_round{round_num-2}.pth")
+            #if is_poison_round:
+            #    args.previous_global_model = os.path.join(models_dir, f"model_round{round_num-2}.pth")
 
             
         
@@ -324,27 +357,27 @@ def main():
                 args.current_round = round_num
                 print(f"Running POISON round {args.current_round}")
                 current_model = federated_poison_round(
-                    pretraining_dataset="cifar10",
-                    dataset_paths=[f"./data/cifar10/partitions/iid/partition_{i}.npz" for i in range(10)],
-                    test_dir="./data/cifar10/test.npz",
-                    mem_dir="./data/cifar10/train.npz",
-                    pretrain_epochs=5, #1 for testing, 5 default
-                    backdoor_epochs=10, #1 for testing, 10 default (2 for badavg)
+                    pretraining_dataset=PRETRAIN_DATASET,
+                    dataset_paths=[f"./data/{PRETRAIN_DATASET}/partitions/{DATASET_DISTRIBUTION}/partition_{i}.npz" for i in range(10)],
+                    test_dir=f"./data/{PRETRAIN_DATASET}/test.npz",
+                    mem_dir=f"./data/{PRETRAIN_DATASET}/train.npz",
+                    pretrain_epochs=CLIENT_EPOCHS, #1 for testing, 5 default
+                    backdoor_epochs=BACKDOOR_EPOCHS, #1 for testing, 10 default (2 for badavg)
                     output_dir=round_dir,
                     trigger_path="./trigger/trigger_pt_white_21_10_ap_replace.npz",
-                    reference_path="./reference/cifar10/truck.npz",
-                    args=args
+                    reference_path=f"./reference/{PRETRAIN_DATASET}/truck.npz",
+                    args=args,
                 )
             else:
                 # For LR scheduler:
                 args.current_round = round_num
                 print(f"Running clean round {args.current_round}")
                 current_model = federated_round(
-                    pretraining_dataset="cifar10",
-                    dataset_paths=[f"./data/cifar10/partitions/iid/partition_{i}.npz" for i in range(10)],
-                    test_dir="./data/cifar10/test.npz",
-                    mem_dir="./data/cifar10/train.npz",
-                    pretrain_epochs=1, #1 for testing, 5 default 
+                    pretraining_dataset=PRETRAIN_DATASET,
+                    dataset_paths=[f"./data/{PRETRAIN_DATASET}/partitions/{DATASET_DISTRIBUTION}/partition_{i}.npz" for i in range(10)],
+                    test_dir=f"./data/{PRETRAIN_DATASET}/test.npz",
+                    mem_dir=f"./data/{PRETRAIN_DATASET}/train.npz",
+                    pretrain_epochs=CLIENT_EPOCHS, #1 for testing, 5 default 
                     output_dir=round_dir,
                     args=args
                 )
@@ -369,7 +402,7 @@ def main():
 
             # Submit model for parallel evaluation with training metrics (non-blocking)
             #downstream_epochs = int(np.ceil(((round_num + 1) * 5) / 2))
-            downstream_epochs = 50 #Hardcapping 50 epochs to avoid crazy numbers
+            downstream_epochs = DOWNSTREAM_EPOCHS #Hardcapping 50 epochs to avoid crazy numbers
             eval_manager.submit_evaluation(stable_model_path, round_num, downstream_epochs, is_poison_round, avg_loss, avg_accuracy)
 
             # Update plots with completed evaluation results (if any)

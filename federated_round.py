@@ -53,7 +53,9 @@ def run_badencoder(
     scale_factor: int,
     naive: int,
     clean_local: str,
-    gpu: int
+    gpu: int,
+    shadow_dataset: str,
+    pretrain_dataset: str
 ) -> str:
     """Runs BadEncoder attack for a malicious client"""
     #output_path = os.path.join(output_dir, f"backdoor_client_{client_id}")
@@ -66,8 +68,8 @@ def run_badencoder(
         --reference_file {reference_path} \
         --results_dir {output_dir} \
         --name model_bd_c{client_id} \
-        --shadow_dataset cifar10 \
-        --encoder_usage_info cifar10 \
+        --shadow_dataset {shadow_dataset} \
+        --encoder_usage_info {pretrain_dataset} \
         --scale_factor {scale_factor} \
         --naive {naive} \
         --clean_local {clean_local} \
@@ -143,7 +145,7 @@ def federated_poison_round(
     
     # Sort which clients are going to be the malicious one for this round
     #malicious = random.sample(range(k), args.num_malicious)
-    malicious = [3] # For testing purposes, always use client 2 as malicious (2 lowest norm, 3 highest norm)
+    malicious = [3] # For reproducibility, always client 3 is malicious
 
     # 1. Pre-training phase for benign clients
     client_models = []
@@ -182,7 +184,9 @@ def federated_poison_round(
                 scale_factor=100 if not args.naive else 0, # Scale factor for BAGEL, but if doing "naive" (bagdasarian+badencoder) then no scale factor
                 naive=args.naive,
                 clean_local = client_models[i], # For train-and-scale
-                gpu=args.gpu
+                gpu=args.gpu,
+                shadow_dataset= args.shadow_dataset,
+                pretrain_dataset= args.pretraining_dataset
                 )
             client_models[i] = poisoned_path
         else:
@@ -198,7 +202,9 @@ def federated_poison_round(
                             clean_local= client_models[i],
                             clipnoise= clipnoise,
                             neurotoxin_mask= neurotoxin_mask,
-                            previous_global_model= args.previous_global_model,)
+                            previous_global_model= args.previous_global_model,
+                            encoder_usage_info= pretraining_dataset,
+                            shadow_dataset= args.shadow_dataset,)
             client_models[i] = poisoned_path
     
     # 3. Aggregate all models
