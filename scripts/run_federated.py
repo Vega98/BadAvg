@@ -22,7 +22,7 @@ from models import get_encoder_architecture
 """ EDIT THIS KNOBS TO CHANGE EXPERIMENT SETTINGS """
 
 # Main parameters (change at will)
-NUM_ROUNDS = 5 # Total number of federated rounds
+NUM_ROUNDS = 100 # Total number of federated rounds
 BAD_ROUNDS = -1 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
 OUTPUT_DIR = "./output/federated_exp_test" # Output directory for logs, models, plots
 PRETRAIN_DATASET = "cifar10" # Dataset for pre-training (either "cifar10" or "stl10")
@@ -42,7 +42,7 @@ CLIENT_EPOCHS = 5 # Number of local epochs for each client during pre-training
 BACKDOOR_EPOCHS = 10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
 FEDAVG_LEARNING_RATE = 0.25 # Learning rate for FedAvg
 TRAINING_GPU_ID = 0 # GPU ID for training (if not sure, leave at 0)
-EVAL_GPU_ID = 0 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available)
+EVAL_GPU_ID = 0 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
 DOWNSTREAM_EPOCHS = 50 # Number of epochs to train downstream classifier during evaluation after each round (higher = slightly better accuracy, but slower)
 
 
