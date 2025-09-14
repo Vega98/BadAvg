@@ -38,7 +38,7 @@ RESUME_ROUND = 0 # If starting from checkpoint (or rebooting experiment from cer
 # Hardcoded / specific parameters (be sure you know what you are doing if you change these)
 NUM_CLIENTS = 10 # Total number of clients for experiment. Unless you change the dataset partitions, keep it at 10.
 BAD_CLIENTS = 1 # Attack was designed for 1 attacker, but this can be changed
-CLIENT_EPOCHS = 1 # Number of local epochs for each client during pre-training
+CLIENT_EPOCHS = 5 # Number of local epochs for each client during pre-training
 BACKDOOR_EPOCHS = 10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
 FEDAVG_LEARNING_RATE = 0.25 # Learning rate for FedAvg
 TRAINING_GPU_ID = 0 # GPU ID for training (if not sure, leave at 0)
@@ -339,13 +339,14 @@ def main():
             if round_num == 199:
                 args.global_model_path = "/home/vega/Documenti/BadEncoder/output/resnet18_ablation/models/model_round198.pth"
             else:
-                if round_num > 0:  # Skip first round since there's no previous model
-                    prev_model_path = os.path.join(models_dir, f"model_round{round_num-1}.pth")
-                    if os.path.exists(prev_model_path):
-                        args.global_model_path = prev_model_path
-                    else:
-                        print(f"Warning: Previous model not found at {prev_model_path}")
             '''
+            if round_num > 0:  # Skip first round since there's no previous model
+                prev_model_path = os.path.join(models_dir, f"model_round{round_num-1}.pth")
+                if os.path.exists(prev_model_path):
+                    args.global_model_path = prev_model_path
+                else:
+                    print(f"Warning: Previous model not found at {prev_model_path}")
+            
                 
             # For neurotoxin, we need to set the old previous global model path
             #if is_poison_round:
