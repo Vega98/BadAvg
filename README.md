@@ -29,42 +29,39 @@ pip install -r requirements.txt
 
 ## Running a Federated Experiment
 
-The script `run_federated.py` launches a federated experiment: it pre-trains an image encoder on the chosen dataset partitions and (optionally) applies the BadAvg attack.
+The script `run_federated.py` launches a federated experiment: it pre-trains an image encoder on the chosen dataset partitions, (optionally) applies the BadAvg attack and finally evaluates the model on a specified downstream dataset, keeping track of classification accuracy and attack success rate.
 
-Control the experiment by editing the indicated lines in the script. The main knobs are:
+Control the experiment by editing the indicated knobs in the script (line 22). Example:
 
-- **Line 235** — `num_rounds = ...`  
-  Number of federated rounds to run.
-
-- **Line 236** — `bad_round = ...`  
-  Run the poisoning attack every `bad_round` rounds. Set to `0` to disable the attack.
-
-- **Line 245** — `base_output_dir = ...`  
-  Directory where experiment outputs (logs, weights, plots) are saved.
-
-- **Lines 328 & 344** — `dataset_paths = ...`  
-  Choose which dataset partitions to use for clean vs. attack rounds. Examples:  
-  ```text
-  ./data/cifar10/partitions/iid/        # CIFAR-10 iid partitions
-  ./data/stl10/partitions/dirichlet/   # STL-10 non-iid (Dirichlet) partitions
+```
+NUM_ROUNDS = 5 # Total number of federated rounds
+BAD_ROUNDS = -1 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+OUTPUT_DIR = "./output/federated_exp_test" # Output directory for logs, models, plots
+PRETRAIN_DATASET = "cifar10" # Dataset for pre-training (either "cifar10" or "stl10")
+SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
+DOWNSTREAM_DATASET = "stl10" # Dataset for evaluation 
+DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
+ATTACK = 0 # 0 for no attack (clean federated experiment), 1 for Naive, 2 for BadAvg, 3 for BAGEL
+DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
+[...]
+```
   
-You can further customize the experiment by editing other parts of the script (number of clients per round, local training epochs, attack type, whether to enable defenses, etc.).
+You can further customize the experiment by editing other knobs (number of clients per round, local training epochs, attack type, whether to enable defenses, etc.) or changing parts of the main script and its callees.
 
-Before running an experiment on CIFAR10 or STL10, you could first download the pre-partitioned data from the following link [data](drive-link) (put the data folder in the main directory). Then, you could run the run_federated.py script: 
+Before running an experiment, you could first download the pre-partitioned data from the following link [data](drive-link) (put the data folder in the main directory). Then, you could run the experiment with the above mentioned standard parameters by simply running: 
 
 ```
 python3 scripts/run_federated.py
 ```
 
+## Running Individual Components
 
-## Training downstream classifiers
+The framework is designed to be **modular**. While `run_federated.py` is the main script for orchestrating a complete federated learning experiment, each core component (pre-training, attack simulation, and evaluation) is a standalone script.
 
-The file training\_downstream\_classifier.py can be used to train a downstream classifier on a downstream task using an image encoder. Here is an example scripts:
-
-```
-python3 scripts/run_cifar10_training_downstream_classifier.py
-```
-
+This allows you to execute specific tasks independently. For example, you can:
+* Run only the **evaluation** on a pre-existing model with `run_[...]_training_downstream_classifier.py`
+* Perform only the model **aggregation** step with `aggregation_experiments.py`
+* Execute a non-federated **pre-training** run to generate an encoder (based on legacy code from the original BadEncoder implementation) with `run_pretraining_encoder.py`.
 
 ## Experimental results
 ...
