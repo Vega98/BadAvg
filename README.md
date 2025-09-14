@@ -46,7 +46,7 @@ DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignore
 [...]
 ```
   
-You can further customize the experiment by editing other knobs (number of clients per round, local training epochs, attack type, whether to enable defenses, etc.) or changing parts of the main script and its callees.
+You can further customize the experiment by editing other knobs (number of clients per round, local training epochs, attack epochs, aggregation learning rate, etc.) or changing parts of the main script and its callees.
 
 Before running an experiment, you could first download the pre-partitioned data from the following link [data](https://mega.nz/file/gVFGgaLJ#mGeW4adaG3bbsR8us-TBF3UNIkvUtD_7R8cLXWyBZuQ) (put the data folder in the main directory). Then, you could run the experiment with the above mentioned standard parameters by simply running: 
 
