@@ -1,0 +1,156 @@
+test_transform_cifar10
+Loaded from: output/cifar10/clean_encoder/model_ft_iid_p9_100.pth
+Feature extracting:   0%|          | 0/79 [00:00<?, ?it/s]Feature extracting:   1%|▏         | 1/79 [00:00<00:12,  6.39it/s]Feature extracting:  23%|██▎       | 18/79 [00:00<00:00, 81.24it/s]Feature extracting:  35%|███▌      | 28/79 [00:00<00:00, 77.86it/s]Feature extracting:  47%|████▋     | 37/79 [00:00<00:00, 79.58it/s]Feature extracting:  58%|█████▊    | 46/79 [00:00<00:00, 82.68it/s]Feature extracting:  70%|██████▉   | 55/79 [00:00<00:00, 84.93it/s]Feature extracting:  81%|████████  | 64/79 [00:00<00:00, 86.23it/s]Feature extracting:  92%|█████████▏| 73/79 [00:00<00:00, 84.73it/s]Feature extracting: 100%|██████████| 79/79 [00:01<00:00, 70.93it/s]
+Feature extracting:   0%|          | 0/125 [00:00<?, ?it/s]Feature extracting:  12%|█▏        | 15/125 [00:00<00:00, 144.40it/s]Feature extracting:  24%|██▍       | 30/125 [00:00<00:00, 98.34it/s] Feature extracting:  33%|███▎      | 41/125 [00:00<00:00, 90.62it/s]Feature extracting:  41%|████      | 51/125 [00:00<00:00, 88.49it/s]Feature extracting:  49%|████▉     | 61/125 [00:00<00:00, 89.07it/s]Feature extracting:  57%|█████▋    | 71/125 [00:00<00:00, 89.49it/s]Feature extracting:  65%|██████▍   | 81/125 [00:00<00:00, 89.81it/s]Feature extracting:  73%|███████▎  | 91/125 [00:00<00:00, 89.84it/s]Feature extracting:  81%|████████  | 101/125 [00:01<00:00, 86.89it/s]Feature extracting:  88%|████████▊ | 110/125 [00:01<00:00, 85.22it/s]Feature extracting:  95%|█████████▌| 119/125 [00:01<00:00, 84.08it/s]Feature extracting: 100%|██████████| 125/125 [00:01<00:00, 88.21it/s]
+Feature extracting:   0%|          | 0/125 [00:00<?, ?it/s]Feature extracting:  12%|█▏        | 15/125 [00:00<00:00, 143.91it/s]Feature extracting:  24%|██▍       | 30/125 [00:00<00:00, 98.94it/s] Feature extracting:  33%|███▎      | 41/125 [00:00<00:00, 95.82it/s]Feature extracting:  41%|████      | 51/125 [00:00<00:00, 93.83it/s]Feature extracting:  49%|████▉     | 61/125 [00:00<00:00, 92.51it/s]Feature extracting:  57%|█████▋    | 71/125 [00:00<00:00, 91.59it/s]Feature extracting:  65%|██████▍   | 81/125 [00:00<00:00, 91.08it/s]Feature extracting:  73%|███████▎  | 91/125 [00:00<00:00, 90.66it/s]Feature extracting:  81%|████████  | 101/125 [00:01<00:00, 90.63it/s]Feature extracting:  89%|████████▉ | 111/125 [00:01<00:00, 90.56it/s]Feature extracting:  97%|█████████▋| 121/125 [00:01<00:00, 90.36it/s]Feature extracting: 100%|██████████| 125/125 [00:01<00:00, 92.39it/s]
+Feature extracting:   0%|          | 0/1 [00:00<?, ?it/s]Feature extracting: 100%|██████████| 1/1 [00:00<00:00, 25.29it/s]
+Train Epoch: 1 	Loss: 2.304751
+{"metric": "Eval - Clean Accuracy (CA)", "value": 35.2125, "epoch": 1}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 0.6375, "epoch": 1}
+Train Epoch: 2 	Loss: 2.063590
+{"metric": "Eval - Clean Accuracy (CA)", "value": 52.175, "epoch": 2}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 13.8625, "epoch": 2}
+Train Epoch: 3 	Loss: 1.613691
+{"metric": "Eval - Clean Accuracy (CA)", "value": 59.9875, "epoch": 3}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 13.4625, "epoch": 3}
+Train Epoch: 4 	Loss: 1.341788
+{"metric": "Eval - Clean Accuracy (CA)", "value": 62.2875, "epoch": 4}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.8625, "epoch": 4}
+Train Epoch: 5 	Loss: 1.178662
+{"metric": "Eval - Clean Accuracy (CA)", "value": 64.1, "epoch": 5}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.8, "epoch": 5}
+Train Epoch: 6 	Loss: 1.084922
+{"metric": "Eval - Clean Accuracy (CA)", "value": 65.2625, "epoch": 6}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.1375, "epoch": 6}
+Train Epoch: 7 	Loss: 1.024991
+{"metric": "Eval - Clean Accuracy (CA)", "value": 65.9625, "epoch": 7}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.3875, "epoch": 7}
+Train Epoch: 8 	Loss: 0.984365
+{"metric": "Eval - Clean Accuracy (CA)", "value": 66.3125, "epoch": 8}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.7, "epoch": 8}
+Train Epoch: 9 	Loss: 0.951737
+{"metric": "Eval - Clean Accuracy (CA)", "value": 66.875, "epoch": 9}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.2125, "epoch": 9}
+Train Epoch: 10 	Loss: 0.935594
+{"metric": "Eval - Clean Accuracy (CA)", "value": 67.2125, "epoch": 10}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.5, "epoch": 10}
+Train Epoch: 11 	Loss: 0.923403
+{"metric": "Eval - Clean Accuracy (CA)", "value": 67.1375, "epoch": 11}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.25, "epoch": 11}
+Train Epoch: 12 	Loss: 0.906248
+{"metric": "Eval - Clean Accuracy (CA)", "value": 67.375, "epoch": 12}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.4375, "epoch": 12}
+Train Epoch: 13 	Loss: 0.894275
+{"metric": "Eval - Clean Accuracy (CA)", "value": 67.5875, "epoch": 13}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.6, "epoch": 13}
+Train Epoch: 14 	Loss: 0.881686
+{"metric": "Eval - Clean Accuracy (CA)", "value": 67.775, "epoch": 14}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.3125, "epoch": 14}
+Train Epoch: 15 	Loss: 0.875280
+{"metric": "Eval - Clean Accuracy (CA)", "value": 67.925, "epoch": 15}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.3375, "epoch": 15}
+Train Epoch: 16 	Loss: 0.867757
+{"metric": "Eval - Clean Accuracy (CA)", "value": 68.025, "epoch": 16}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.45, "epoch": 16}
+Train Epoch: 17 	Loss: 0.857537
+{"metric": "Eval - Clean Accuracy (CA)", "value": 68.3, "epoch": 17}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.3875, "epoch": 17}
+Train Epoch: 18 	Loss: 0.853180
+{"metric": "Eval - Clean Accuracy (CA)", "value": 68.4375, "epoch": 18}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.2, "epoch": 18}
+Train Epoch: 19 	Loss: 0.845230
+{"metric": "Eval - Clean Accuracy (CA)", "value": 68.475, "epoch": 19}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.4, "epoch": 19}
+Train Epoch: 20 	Loss: 0.845432
+{"metric": "Eval - Clean Accuracy (CA)", "value": 68.675, "epoch": 20}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.4125, "epoch": 20}
+Train Epoch: 21 	Loss: 0.838772
+{"metric": "Eval - Clean Accuracy (CA)", "value": 68.725, "epoch": 21}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.3875, "epoch": 21}
+Train Epoch: 22 	Loss: 0.835778
+{"metric": "Eval - Clean Accuracy (CA)", "value": 68.875, "epoch": 22}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.225, "epoch": 22}
+Train Epoch: 23 	Loss: 0.830094
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.05, "epoch": 23}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.3375, "epoch": 23}
+Train Epoch: 24 	Loss: 0.822272
+{"metric": "Eval - Clean Accuracy (CA)", "value": 68.95, "epoch": 24}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.3, "epoch": 24}
+Train Epoch: 25 	Loss: 0.816218
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.2125, "epoch": 25}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.2, "epoch": 25}
+Train Epoch: 26 	Loss: 0.809172
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.3, "epoch": 26}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.3, "epoch": 26}
+Train Epoch: 27 	Loss: 0.808566
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.4, "epoch": 27}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.2125, "epoch": 27}
+Train Epoch: 28 	Loss: 0.806405
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.4625, "epoch": 28}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.0125, "epoch": 28}
+Train Epoch: 29 	Loss: 0.804353
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.5875, "epoch": 29}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.275, "epoch": 29}
+Train Epoch: 30 	Loss: 0.797733
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.575, "epoch": 30}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.3125, "epoch": 30}
+Train Epoch: 31 	Loss: 0.800871
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.725, "epoch": 31}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.1125, "epoch": 31}
+Train Epoch: 32 	Loss: 0.787115
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.7875, "epoch": 32}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.1375, "epoch": 32}
+Train Epoch: 33 	Loss: 0.783878
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.85, "epoch": 33}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.075, "epoch": 33}
+Train Epoch: 34 	Loss: 0.780587
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.85, "epoch": 34}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.8125, "epoch": 34}
+Train Epoch: 35 	Loss: 0.778169
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.9, "epoch": 35}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.925, "epoch": 35}
+Train Epoch: 36 	Loss: 0.772534
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.0, "epoch": 36}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.0, "epoch": 36}
+Train Epoch: 37 	Loss: 0.773463
+{"metric": "Eval - Clean Accuracy (CA)", "value": 69.9625, "epoch": 37}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.8, "epoch": 37}
+Train Epoch: 38 	Loss: 0.772368
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.125, "epoch": 38}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.0375, "epoch": 38}
+Train Epoch: 39 	Loss: 0.767175
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.25, "epoch": 39}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.75, "epoch": 39}
+Train Epoch: 40 	Loss: 0.766661
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.2375, "epoch": 40}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.7375, "epoch": 40}
+Train Epoch: 41 	Loss: 0.757413
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.2625, "epoch": 41}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.5, "epoch": 41}
+Train Epoch: 42 	Loss: 0.752599
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.1125, "epoch": 42}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 12.225, "epoch": 42}
+Train Epoch: 43 	Loss: 0.757502
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.2125, "epoch": 43}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.825, "epoch": 43}
+Train Epoch: 44 	Loss: 0.753416
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.3, "epoch": 44}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.8, "epoch": 44}
+Train Epoch: 45 	Loss: 0.745010
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.525, "epoch": 45}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.475, "epoch": 45}
+Train Epoch: 46 	Loss: 0.745477
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.4375, "epoch": 46}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.3875, "epoch": 46}
+Train Epoch: 47 	Loss: 0.738166
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.575, "epoch": 47}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.3625, "epoch": 47}
+Train Epoch: 48 	Loss: 0.734718
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.425, "epoch": 48}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.2625, "epoch": 48}
+Train Epoch: 49 	Loss: 0.734629
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.5875, "epoch": 49}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.3625, "epoch": 49}
+Train Epoch: 50 	Loss: 0.728915
+{"metric": "Eval - Clean Accuracy (CA)", "value": 70.6, "epoch": 50}
+{"metric": "Eval - Attack Success Rate-Baseline (ASR-B)", "value": 11.4375, "epoch": 50}

@@ -1,0 +1,156 @@
+test_transform_cifar10
+Loaded from: ./output/cifar10/stl10_backdoored_encoder/aggregated/avg_badagg.pth
+Feature extracting:   0%|          | 0/613 [00:00<?, ?it/s]Feature extracting:   0%|          | 1/613 [00:00<01:32,  6.63it/s]Feature extracting:   3%|▎         | 18/613 [00:00<00:07, 82.61it/s]Feature extracting:   5%|▍         | 28/613 [00:00<00:07, 79.48it/s]Feature extracting:   6%|▌         | 37/613 [00:00<00:07, 80.11it/s]Feature extracting:   8%|▊         | 46/613 [00:00<00:07, 80.53it/s]Feature extracting:   9%|▉         | 55/613 [00:00<00:06, 80.64it/s]Feature extracting:  10%|█         | 64/613 [00:00<00:06, 80.91it/s]Feature extracting:  12%|█▏        | 73/613 [00:00<00:06, 80.97it/s]Feature extracting:  13%|█▎        | 82/613 [00:01<00:06, 81.96it/s]Feature extracting:  15%|█▍        | 91/613 [00:01<00:06, 81.41it/s]Feature extracting:  16%|█▋        | 101/613 [00:01<00:05, 85.45it/s]Feature extracting:  18%|█▊        | 110/613 [00:01<00:05, 86.47it/s]Feature extracting:  19%|█▉        | 119/613 [00:01<00:05, 84.75it/s]Feature extracting:  21%|██        | 128/613 [00:01<00:05, 83.48it/s]Feature extracting:  22%|██▏       | 137/613 [00:01<00:05, 82.57it/s]Feature extracting:  24%|██▍       | 146/613 [00:01<00:05, 81.79it/s]Feature extracting:  25%|██▌       | 155/613 [00:01<00:05, 81.76it/s]Feature extracting:  27%|██▋       | 164/613 [00:02<00:05, 81.45it/s]Feature extracting:  28%|██▊       | 173/613 [00:02<00:05, 80.98it/s]Feature extracting:  30%|██▉       | 182/613 [00:02<00:05, 80.75it/s]Feature extracting:  31%|███       | 191/613 [00:02<00:05, 80.77it/s]Feature extracting:  33%|███▎      | 200/613 [00:02<00:05, 80.69it/s]Feature extracting:  34%|███▍      | 209/613 [00:02<00:04, 80.89it/s]Feature extracting:  36%|███▌      | 218/613 [00:02<00:04, 80.83it/s]Feature extracting:  37%|███▋      | 227/613 [00:02<00:04, 80.81it/s]Feature extracting:  39%|███▊      | 237/613 [00:02<00:04, 83.93it/s]Feature extracting:  40%|████      | 246/613 [00:03<00:04, 85.31it/s]Feature extracting:  42%|████▏     | 255/613 [00:03<00:04, 85.01it/s]Feature extracting:  43%|████▎     | 265/613 [00:03<00:03, 88.03it/s]Feature extracting:  45%|████▍     | 275/613 [00:03<00:03, 90.01it/s]Feature extracting:  46%|████▋     | 285/613 [00:03<00:03, 89.92it/s]Feature extracting:  48%|████▊     | 294/613 [00:03<00:03, 86.97it/s]Feature extracting:  49%|████▉     | 303/613 [00:03<00:03, 85.17it/s]Feature extracting:  51%|█████     | 312/613 [00:03<00:03, 84.23it/s]Feature extracting:  52%|█████▏    | 321/613 [00:03<00:03, 83.38it/s]Feature extracting:  54%|█████▍    | 330/613 [00:04<00:03, 82.72it/s]Feature extracting:  55%|█████▌    | 339/613 [00:04<00:03, 82.56it/s]Feature extracting:  57%|█████▋    | 348/613 [00:04<00:03, 82.12it/s]Feature extracting:  58%|█████▊    | 357/613 [00:04<00:03, 83.66it/s]Feature extracting:  60%|█████▉    | 367/613 [00:04<00:02, 87.10it/s]Feature extracting:  62%|██████▏   | 377/613 [00:04<00:02, 89.52it/s]Feature extracting:  63%|██████▎   | 387/613 [00:04<00:02, 91.25it/s]Feature extracting:  65%|██████▍   | 397/613 [00:04<00:02, 92.27it/s]Feature extracting:  66%|██████▋   | 407/613 [00:04<00:02, 93.15it/s]Feature extracting:  68%|██████▊   | 417/613 [00:04<00:02, 93.78it/s]Feature extracting:  70%|██████▉   | 427/613 [00:05<00:01, 94.25it/s]Feature extracting:  71%|███████▏  | 437/613 [00:05<00:01, 94.50it/s]Feature extracting:  73%|███████▎  | 447/613 [00:05<00:01, 94.77it/s]Feature extracting:  75%|███████▍  | 457/613 [00:05<00:01, 94.97it/s]Feature extracting:  76%|███████▌  | 467/613 [00:05<00:01, 95.04it/s]Feature extracting:  78%|███████▊  | 477/613 [00:05<00:01, 95.10it/s]Feature extracting:  79%|███████▉  | 487/613 [00:05<00:01, 95.17it/s]Feature extracting:  81%|████████  | 497/613 [00:05<00:01, 94.84it/s]Feature extracting:  83%|████████▎ | 507/613 [00:05<00:01, 94.96it/s]Feature extracting:  84%|████████▍ | 517/613 [00:06<00:01, 95.09it/s]Feature extracting:  86%|████████▌ | 527/613 [00:06<00:00, 95.16it/s]Feature extracting:  88%|████████▊ | 537/613 [00:06<00:00, 95.19it/s]Feature extracting:  89%|████████▉ | 547/613 [00:06<00:00, 95.10it/s]Feature extracting:  91%|█████████ | 557/613 [00:06<00:00, 95.16it/s]Feature extracting:  92%|█████████▏| 567/613 [00:06<00:00, 95.20it/s]Feature extracting:  94%|█████████▍| 577/613 [00:06<00:00, 95.24it/s]Feature extracting:  96%|█████████▌| 587/613 [00:06<00:00, 95.10it/s]Feature extracting:  97%|█████████▋| 597/613 [00:06<00:00, 95.15it/s]Feature extracting:  99%|█████████▉| 607/613 [00:06<00:00, 95.21it/s]Feature extracting: 100%|██████████| 613/613 [00:07<00:00, 85.97it/s]
+Feature extracting:   0%|          | 0/198 [00:00<?, ?it/s]Feature extracting:   9%|▊         | 17/198 [00:00<00:01, 153.05it/s]Feature extracting:  17%|█▋        | 33/198 [00:00<00:01, 111.71it/s]Feature extracting:  23%|██▎       | 45/198 [00:00<00:01, 104.19it/s]Feature extracting:  28%|██▊       | 56/198 [00:00<00:01, 100.73it/s]Feature extracting:  34%|███▍      | 67/198 [00:00<00:01, 98.87it/s] Feature extracting:  39%|███▉      | 77/198 [00:00<00:01, 97.37it/s]Feature extracting:  44%|████▍     | 87/198 [00:00<00:01, 96.78it/s]Feature extracting:  49%|████▉     | 97/198 [00:00<00:01, 96.40it/s]Feature extracting:  54%|█████▍    | 107/198 [00:01<00:00, 93.34it/s]Feature extracting:  59%|█████▉    | 117/198 [00:01<00:00, 93.15it/s]Feature extracting:  64%|██████▍   | 127/198 [00:01<00:00, 93.47it/s]Feature extracting:  69%|██████▉   | 137/198 [00:01<00:00, 94.05it/s]Feature extracting:  74%|███████▍  | 147/198 [00:01<00:00, 94.46it/s]Feature extracting:  79%|███████▉  | 157/198 [00:01<00:00, 94.47it/s]Feature extracting:  84%|████████▍ | 167/198 [00:01<00:00, 94.09it/s]Feature extracting:  89%|████████▉ | 177/198 [00:01<00:00, 93.93it/s]Feature extracting:  94%|█████████▍| 187/198 [00:01<00:00, 94.31it/s]Feature extracting:  99%|█████████▉| 197/198 [00:02<00:00, 94.07it/s]Feature extracting: 100%|██████████| 198/198 [00:02<00:00, 92.37it/s]
+Feature extracting:   0%|          | 0/198 [00:00<?, ?it/s]Feature extracting:   8%|▊         | 16/198 [00:00<00:01, 158.32it/s]Feature extracting:  16%|█▌        | 32/198 [00:00<00:01, 111.43it/s]Feature extracting:  22%|██▏       | 44/198 [00:00<00:01, 104.63it/s]Feature extracting:  28%|██▊       | 55/198 [00:00<00:01, 100.71it/s]Feature extracting:  33%|███▎      | 66/198 [00:00<00:01, 98.44it/s] Feature extracting:  38%|███▊      | 76/198 [00:00<00:01, 97.43it/s]Feature extracting:  43%|████▎     | 86/198 [00:00<00:01, 96.75it/s]Feature extracting:  48%|████▊     | 96/198 [00:00<00:01, 96.07it/s]Feature extracting:  54%|█████▎    | 106/198 [00:01<00:00, 95.78it/s]Feature extracting:  59%|█████▊    | 116/198 [00:01<00:00, 95.39it/s]Feature extracting:  64%|██████▎   | 126/198 [00:01<00:00, 95.34it/s]Feature extracting:  69%|██████▊   | 136/198 [00:01<00:00, 95.31it/s]Feature extracting:  74%|███████▎  | 146/198 [00:01<00:00, 95.10it/s]Feature extracting:  79%|███████▉  | 156/198 [00:01<00:00, 95.10it/s]Feature extracting:  84%|████████▍ | 166/198 [00:01<00:00, 95.17it/s]Feature extracting:  89%|████████▉ | 176/198 [00:01<00:00, 95.17it/s]Feature extracting:  94%|█████████▍| 186/198 [00:01<00:00, 95.17it/s]Feature extracting:  99%|█████████▉| 196/198 [00:02<00:00, 95.19it/s]Feature extracting: 100%|██████████| 198/198 [00:02<00:00, 97.40it/s]
+Feature extracting:   0%|          | 0/1 [00:00<?, ?it/s]Feature extracting: 100%|██████████| 1/1 [00:00<00:00, 24.50it/s]
+Train Epoch: 1 	Loss: 3.781248
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.049089469517023, "epoch": 1}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 1}
+Train Epoch: 2 	Loss: 3.398513
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 5.938242280285036, "epoch": 2}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 2}
+Train Epoch: 3 	Loss: 3.145552
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 5.938242280285036, "epoch": 3}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 3}
+Train Epoch: 4 	Loss: 3.069409
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 5.938242280285036, "epoch": 4}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 4}
+Train Epoch: 5 	Loss: 2.960593
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 5.938242280285036, "epoch": 5}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 5}
+Train Epoch: 6 	Loss: 2.888115
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 5.938242280285036, "epoch": 6}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 6}
+Train Epoch: 7 	Loss: 2.836257
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.595407759303246, "epoch": 7}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 7}
+Train Epoch: 8 	Loss: 2.777161
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 9.43784639746635, "epoch": 8}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 8}
+Train Epoch: 9 	Loss: 2.736520
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 8.107680126682501, "epoch": 9}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 9}
+Train Epoch: 10 	Loss: 2.723807
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 8.083927157561362, "epoch": 10}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 10}
+Train Epoch: 11 	Loss: 2.687969
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 9.58036421219319, "epoch": 11}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 11}
+Train Epoch: 12 	Loss: 2.670236
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 8.756927949326998, "epoch": 12}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 12}
+Train Epoch: 13 	Loss: 2.620395
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 9.588281868566904, "epoch": 13}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 13}
+Train Epoch: 14 	Loss: 2.569855
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 11.084718923198734, "epoch": 14}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0395882818685669, "epoch": 14}
+Train Epoch: 15 	Loss: 2.566124
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 12.589073634204276, "epoch": 15}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.42755344418052255, "epoch": 15}
+Train Epoch: 16 	Loss: 2.586700
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 12.984956452889945, "epoch": 16}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.21377672209026127, "epoch": 16}
+Train Epoch: 17 	Loss: 2.582969
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 12.78701504354711, "epoch": 17}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.055423594615993665, "epoch": 17}
+Train Epoch: 18 	Loss: 2.624149
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 12.31987331749802, "epoch": 18}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.03167062549485352, "epoch": 18}
+Train Epoch: 19 	Loss: 2.532179
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 13.016627078384799, "epoch": 19}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 19}
+Train Epoch: 20 	Loss: 2.529644
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 11.765637371338084, "epoch": 20}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.03167062549485352, "epoch": 20}
+Train Epoch: 21 	Loss: 2.398823
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 12.874109263657957, "epoch": 21}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 21}
+Train Epoch: 22 	Loss: 2.414042
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 14.4972288202692, "epoch": 22}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 22}
+Train Epoch: 23 	Loss: 2.396514
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 15.304829770387965, "epoch": 23}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.00791765637371338, "epoch": 23}
+Train Epoch: 24 	Loss: 2.372035
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 16.04117181314331, "epoch": 24}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.00791765637371338, "epoch": 24}
+Train Epoch: 25 	Loss: 2.351534
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 16.72209026128266, "epoch": 25}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0791765637371338, "epoch": 25}
+Train Epoch: 26 	Loss: 2.336803
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 18.66983372921615, "epoch": 26}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0791765637371338, "epoch": 26}
+Train Epoch: 27 	Loss: 2.264373
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 17.672209026128264, "epoch": 27}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0791765637371338, "epoch": 27}
+Train Epoch: 28 	Loss: 2.233027
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 19.22406967537609, "epoch": 28}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0791765637371338, "epoch": 28}
+Train Epoch: 29 	Loss: 2.254503
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 19.42992874109264, "epoch": 29}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.08709422011084719, "epoch": 29}
+Train Epoch: 30 	Loss: 2.213104
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 19.762470308788597, "epoch": 30}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.08709422011084719, "epoch": 30}
+Train Epoch: 31 	Loss: 2.144760
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 22.137767220902614, "epoch": 31}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0791765637371338, "epoch": 31}
+Train Epoch: 32 	Loss: 2.201224
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 21.654790182106098, "epoch": 32}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.1187648456057007, "epoch": 32}
+Train Epoch: 33 	Loss: 2.112643
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 23.159144893111637, "epoch": 33}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.12668250197941408, "epoch": 33}
+Train Epoch: 34 	Loss: 2.093772
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 24.901029295328584, "epoch": 34}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.12668250197941408, "epoch": 34}
+Train Epoch: 35 	Loss: 2.060429
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 25.33650039588282, "epoch": 35}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.18210609659540775, "epoch": 35}
+Train Epoch: 36 	Loss: 2.028842
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 26.025336500395884, "epoch": 36}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.166270783847981, "epoch": 36}
+Train Epoch: 37 	Loss: 2.013282
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 25.566112430720505, "epoch": 37}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.22961203483768805, "epoch": 37}
+Train Epoch: 38 	Loss: 2.023176
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 26.39746634996041, "epoch": 38}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.2454473475851148, "epoch": 38}
+Train Epoch: 39 	Loss: 1.977907
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 29.22406967537609, "epoch": 39}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.2454473475851148, "epoch": 39}
+Train Epoch: 40 	Loss: 1.971329
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 29.287410926365794, "epoch": 40}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.21377672209026127, "epoch": 40}
+Train Epoch: 41 	Loss: 1.944145
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 31.361836896278703, "epoch": 41}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.22961203483768805, "epoch": 41}
+Train Epoch: 42 	Loss: 1.935442
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 30.340459224069676, "epoch": 42}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.19002375296912113, "epoch": 42}
+Train Epoch: 43 	Loss: 1.911305
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 32.42280285035629, "epoch": 43}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.2058590657165479, "epoch": 43}
+Train Epoch: 44 	Loss: 1.896191
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 31.44893111638955, "epoch": 44}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.19002375296912113, "epoch": 44}
+Train Epoch: 45 	Loss: 1.873045
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 32.937450514647665, "epoch": 45}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.19794140934283452, "epoch": 45}
+Train Epoch: 46 	Loss: 1.879092
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 31.75771971496437, "epoch": 46}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.2058590657165479, "epoch": 46}
+Train Epoch: 47 	Loss: 1.843537
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 31.836896278701506, "epoch": 47}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.2058590657165479, "epoch": 47}
+Train Epoch: 48 	Loss: 1.849428
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 32.937450514647665, "epoch": 48}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.21377672209026127, "epoch": 48}
+Train Epoch: 49 	Loss: 1.817319
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 33.07205067300079, "epoch": 49}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.2058590657165479, "epoch": 49}
+Train Epoch: 50 	Loss: 1.828063
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 34.71892319873317, "epoch": 50}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.19794140934283452, "epoch": 50}

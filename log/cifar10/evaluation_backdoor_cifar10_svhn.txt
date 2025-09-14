@@ -1,0 +1,156 @@
+test_transform_cifar10
+Loaded from: ./output/cifar10/stl10_backdoored_encoder/aggregated/avg_clipnoise.pth
+Feature extracting:   0%|          | 0/1145 [00:00<?, ?it/s]Feature extracting:   0%|          | 1/1145 [00:00<03:37,  5.25it/s]Feature extracting:   1%|▏         | 17/1145 [00:00<00:16, 70.13it/s]Feature extracting:   2%|▏         | 27/1145 [00:00<00:16, 69.32it/s]Feature extracting:   3%|▎         | 36/1145 [00:00<00:15, 69.36it/s]Feature extracting:   4%|▍         | 44/1145 [00:00<00:15, 69.39it/s]Feature extracting:   5%|▍         | 52/1145 [00:00<00:15, 69.14it/s]Feature extracting:   5%|▌         | 60/1145 [00:00<00:15, 69.82it/s]Feature extracting:   6%|▌         | 68/1145 [00:01<00:15, 69.88it/s]Feature extracting:   7%|▋         | 76/1145 [00:01<00:14, 71.78it/s]Feature extracting:   7%|▋         | 84/1145 [00:01<00:14, 72.59it/s]Feature extracting:   8%|▊         | 92/1145 [00:01<00:14, 73.43it/s]Feature extracting:   9%|▊         | 100/1145 [00:01<00:14, 74.42it/s]Feature extracting:   9%|▉         | 108/1145 [00:01<00:14, 73.97it/s]Feature extracting:  10%|█         | 116/1145 [00:01<00:13, 74.36it/s]Feature extracting:  11%|█         | 124/1145 [00:01<00:13, 74.87it/s]Feature extracting:  12%|█▏        | 132/1145 [00:01<00:13, 74.57it/s]Feature extracting:  12%|█▏        | 140/1145 [00:01<00:13, 75.26it/s]Feature extracting:  13%|█▎        | 148/1145 [00:02<00:13, 74.45it/s]Feature extracting:  14%|█▎        | 156/1145 [00:02<00:13, 75.23it/s]Feature extracting:  14%|█▍        | 164/1145 [00:02<00:12, 75.49it/s]Feature extracting:  15%|█▌        | 172/1145 [00:02<00:13, 74.69it/s]Feature extracting:  16%|█▌        | 180/1145 [00:02<00:12, 75.24it/s]Feature extracting:  16%|█▋        | 188/1145 [00:02<00:12, 76.57it/s]Feature extracting:  17%|█▋        | 197/1145 [00:02<00:12, 78.34it/s]Feature extracting:  18%|█▊        | 206/1145 [00:02<00:11, 80.00it/s]Feature extracting:  19%|█▉        | 215/1145 [00:02<00:11, 80.49it/s]Feature extracting:  20%|█▉        | 224/1145 [00:03<00:11, 80.86it/s]Feature extracting:  20%|██        | 233/1145 [00:03<00:11, 81.37it/s]Feature extracting:  21%|██        | 242/1145 [00:03<00:11, 82.05it/s]Feature extracting:  22%|██▏       | 251/1145 [00:03<00:10, 82.58it/s]Feature extracting:  23%|██▎       | 260/1145 [00:03<00:10, 83.01it/s]Feature extracting:  23%|██▎       | 269/1145 [00:03<00:10, 82.72it/s]Feature extracting:  24%|██▍       | 278/1145 [00:03<00:10, 80.45it/s]Feature extracting:  25%|██▌       | 287/1145 [00:03<00:10, 80.88it/s]Feature extracting:  26%|██▌       | 296/1145 [00:03<00:10, 81.48it/s]Feature extracting:  27%|██▋       | 305/1145 [00:04<00:10, 79.74it/s]Feature extracting:  27%|██▋       | 313/1145 [00:04<00:10, 78.19it/s]Feature extracting:  28%|██▊       | 321/1145 [00:04<00:10, 77.43it/s]Feature extracting:  29%|██▊       | 329/1145 [00:04<00:10, 76.74it/s]Feature extracting:  29%|██▉       | 337/1145 [00:04<00:10, 76.61it/s]Feature extracting:  30%|███       | 345/1145 [00:04<00:10, 76.36it/s]Feature extracting:  31%|███       | 353/1145 [00:04<00:10, 76.28it/s]Feature extracting:  32%|███▏      | 361/1145 [00:04<00:10, 75.85it/s]Feature extracting:  32%|███▏      | 369/1145 [00:04<00:10, 76.05it/s]Feature extracting:  33%|███▎      | 378/1145 [00:05<00:09, 77.88it/s]Feature extracting:  34%|███▍      | 387/1145 [00:05<00:09, 79.22it/s]Feature extracting:  35%|███▍      | 396/1145 [00:05<00:09, 80.07it/s]Feature extracting:  35%|███▌      | 405/1145 [00:05<00:09, 80.66it/s]Feature extracting:  36%|███▌      | 414/1145 [00:05<00:09, 81.07it/s]Feature extracting:  37%|███▋      | 423/1145 [00:05<00:08, 81.36it/s]Feature extracting:  38%|███▊      | 432/1145 [00:05<00:08, 81.60it/s]Feature extracting:  39%|███▊      | 441/1145 [00:05<00:08, 81.52it/s]Feature extracting:  39%|███▉      | 450/1145 [00:05<00:08, 82.00it/s]Feature extracting:  40%|████      | 459/1145 [00:05<00:08, 82.14it/s]Feature extracting:  41%|████      | 468/1145 [00:06<00:08, 82.05it/s]Feature extracting:  42%|████▏     | 477/1145 [00:06<00:08, 82.27it/s]Feature extracting:  42%|████▏     | 486/1145 [00:06<00:07, 83.40it/s]Feature extracting:  43%|████▎     | 495/1145 [00:06<00:08, 81.11it/s]Feature extracting:  44%|████▍     | 504/1145 [00:06<00:08, 79.13it/s]Feature extracting:  45%|████▍     | 512/1145 [00:06<00:08, 77.02it/s]Feature extracting:  45%|████▌     | 520/1145 [00:06<00:08, 76.65it/s]Feature extracting:  46%|████▌     | 528/1145 [00:06<00:08, 76.01it/s]Feature extracting:  47%|████▋     | 536/1145 [00:06<00:08, 74.96it/s]Feature extracting:  48%|████▊     | 544/1145 [00:07<00:08, 74.26it/s]Feature extracting:  48%|████▊     | 552/1145 [00:07<00:07, 74.31it/s]Feature extracting:  49%|████▉     | 560/1145 [00:07<00:07, 74.79it/s]Feature extracting:  50%|████▉     | 568/1145 [00:07<00:07, 74.73it/s]Feature extracting:  50%|█████     | 576/1145 [00:07<00:07, 72.98it/s]Feature extracting:  51%|█████     | 584/1145 [00:07<00:07, 72.01it/s]Feature extracting:  52%|█████▏    | 592/1145 [00:07<00:07, 71.05it/s]Feature extracting:  52%|█████▏    | 600/1145 [00:07<00:07, 70.42it/s]Feature extracting:  53%|█████▎    | 608/1145 [00:07<00:07, 70.25it/s]Feature extracting:  54%|█████▍    | 616/1145 [00:08<00:07, 71.33it/s]Feature extracting:  54%|█████▍    | 624/1145 [00:08<00:07, 71.50it/s]Feature extracting:  55%|█████▌    | 632/1145 [00:08<00:07, 72.63it/s]Feature extracting:  56%|█████▌    | 640/1145 [00:08<00:06, 73.33it/s]Feature extracting:  57%|█████▋    | 648/1145 [00:08<00:06, 73.86it/s]Feature extracting:  57%|█████▋    | 656/1145 [00:08<00:06, 74.47it/s]Feature extracting:  58%|█████▊    | 664/1145 [00:08<00:06, 74.75it/s]Feature extracting:  59%|█████▊    | 672/1145 [00:08<00:06, 74.98it/s]Feature extracting:  59%|█████▉    | 680/1145 [00:08<00:06, 74.24it/s]Feature extracting:  60%|██████    | 688/1145 [00:09<00:06, 73.98it/s]Feature extracting:  61%|██████    | 696/1145 [00:09<00:06, 73.60it/s]Feature extracting:  61%|██████▏   | 704/1145 [00:09<00:06, 73.09it/s]Feature extracting:  62%|██████▏   | 712/1145 [00:09<00:06, 72.01it/s]Feature extracting:  63%|██████▎   | 720/1145 [00:09<00:05, 72.69it/s]Feature extracting:  64%|██████▎   | 729/1145 [00:09<00:05, 75.95it/s]Feature extracting:  64%|██████▍   | 737/1145 [00:09<00:05, 76.59it/s]Feature extracting:  65%|██████▌   | 746/1145 [00:09<00:05, 78.21it/s]Feature extracting:  66%|██████▌   | 754/1145 [00:09<00:04, 78.40it/s]Feature extracting:  67%|██████▋   | 762/1145 [00:10<00:04, 78.50it/s]Feature extracting:  67%|██████▋   | 771/1145 [00:10<00:04, 79.78it/s]Feature extracting:  68%|██████▊   | 780/1145 [00:10<00:04, 79.98it/s]Feature extracting:  69%|██████▉   | 788/1145 [00:10<00:04, 79.54it/s]Feature extracting:  70%|██████▉   | 797/1145 [00:10<00:04, 80.39it/s]Feature extracting:  70%|███████   | 806/1145 [00:10<00:04, 81.51it/s]Feature extracting:  71%|███████   | 815/1145 [00:10<00:03, 82.53it/s]Feature extracting:  72%|███████▏  | 824/1145 [00:10<00:03, 83.21it/s]Feature extracting:  73%|███████▎  | 833/1145 [00:10<00:03, 83.68it/s]Feature extracting:  74%|███████▎  | 842/1145 [00:11<00:03, 84.05it/s]Feature extracting:  74%|███████▍  | 851/1145 [00:11<00:03, 84.21it/s]Feature extracting:  75%|███████▌  | 860/1145 [00:11<00:03, 84.44it/s]Feature extracting:  76%|███████▌  | 869/1145 [00:11<00:03, 84.46it/s]Feature extracting:  77%|███████▋  | 878/1145 [00:11<00:03, 84.74it/s]Feature extracting:  77%|███████▋  | 887/1145 [00:11<00:03, 85.61it/s]Feature extracting:  78%|███████▊  | 896/1145 [00:11<00:02, 85.22it/s]Feature extracting:  79%|███████▉  | 905/1145 [00:11<00:02, 85.14it/s]Feature extracting:  80%|███████▉  | 914/1145 [00:11<00:02, 85.01it/s]Feature extracting:  81%|████████  | 923/1145 [00:11<00:02, 84.78it/s]Feature extracting:  81%|████████▏ | 932/1145 [00:12<00:02, 84.69it/s]Feature extracting:  82%|████████▏ | 941/1145 [00:12<00:02, 84.62it/s]Feature extracting:  83%|████████▎ | 950/1145 [00:12<00:02, 84.57it/s]Feature extracting:  84%|████████▍ | 959/1145 [00:12<00:02, 84.60it/s]Feature extracting:  85%|████████▍ | 968/1145 [00:12<00:02, 84.74it/s]Feature extracting:  85%|████████▌ | 977/1145 [00:12<00:01, 84.59it/s]Feature extracting:  86%|████████▌ | 986/1145 [00:12<00:01, 84.51it/s]Feature extracting:  87%|████████▋ | 995/1145 [00:12<00:01, 84.58it/s]Feature extracting:  88%|████████▊ | 1004/1145 [00:12<00:01, 84.57it/s]Feature extracting:  88%|████████▊ | 1013/1145 [00:13<00:01, 84.64it/s]Feature extracting:  89%|████████▉ | 1022/1145 [00:13<00:01, 84.49it/s]Feature extracting:  90%|█████████ | 1031/1145 [00:13<00:01, 84.54it/s]Feature extracting:  91%|█████████ | 1040/1145 [00:13<00:01, 84.58it/s]Feature extracting:  92%|█████████▏| 1049/1145 [00:13<00:01, 85.07it/s]Feature extracting:  92%|█████████▏| 1058/1145 [00:13<00:01, 82.37it/s]Feature extracting:  93%|█████████▎| 1067/1145 [00:13<00:00, 80.88it/s]Feature extracting:  94%|█████████▍| 1076/1145 [00:13<00:00, 79.78it/s]Feature extracting:  95%|█████████▍| 1084/1145 [00:13<00:00, 78.94it/s]Feature extracting:  95%|█████████▌| 1092/1145 [00:14<00:00, 78.37it/s]Feature extracting:  96%|█████████▌| 1100/1145 [00:14<00:00, 78.01it/s]Feature extracting:  97%|█████████▋| 1108/1145 [00:14<00:00, 77.77it/s]Feature extracting:  97%|█████████▋| 1116/1145 [00:14<00:00, 77.52it/s]Feature extracting:  98%|█████████▊| 1124/1145 [00:14<00:00, 77.31it/s]Feature extracting:  99%|█████████▉| 1132/1145 [00:14<00:00, 77.19it/s]Feature extracting: 100%|█████████▉| 1140/1145 [00:14<00:00, 77.10it/s]Feature extracting: 100%|██████████| 1145/1145 [00:14<00:00, 77.28it/s]
+Feature extracting:   0%|          | 0/407 [00:00<?, ?it/s]Feature extracting:   3%|▎         | 14/407 [00:00<00:02, 138.97it/s]Feature extracting:   7%|▋         | 28/407 [00:00<00:03, 94.95it/s] Feature extracting:  10%|▉         | 39/407 [00:00<00:04, 87.27it/s]Feature extracting:  12%|█▏        | 49/407 [00:00<00:04, 83.54it/s]Feature extracting:  14%|█▍        | 58/407 [00:00<00:04, 79.96it/s]Feature extracting:  16%|█▋        | 67/407 [00:00<00:04, 78.59it/s]Feature extracting:  18%|█▊        | 75/407 [00:00<00:04, 77.46it/s]Feature extracting:  20%|██        | 83/407 [00:01<00:04, 77.21it/s]Feature extracting:  22%|██▏       | 91/407 [00:01<00:04, 76.89it/s]Feature extracting:  24%|██▍       | 99/407 [00:01<00:04, 76.92it/s]Feature extracting:  26%|██▋       | 107/407 [00:01<00:03, 76.72it/s]Feature extracting:  28%|██▊       | 115/407 [00:01<00:03, 75.34it/s]Feature extracting:  30%|███       | 123/407 [00:01<00:03, 75.64it/s]Feature extracting:  32%|███▏      | 131/407 [00:01<00:03, 75.64it/s]Feature extracting:  34%|███▍      | 140/407 [00:01<00:03, 77.77it/s]Feature extracting:  37%|███▋      | 149/407 [00:01<00:03, 79.66it/s]Feature extracting:  39%|███▉      | 158/407 [00:01<00:03, 81.17it/s]Feature extracting:  41%|████      | 167/407 [00:02<00:03, 79.74it/s]Feature extracting:  43%|████▎     | 175/407 [00:02<00:02, 78.91it/s]Feature extracting:  45%|████▍     | 183/407 [00:02<00:02, 77.95it/s]Feature extracting:  47%|████▋     | 191/407 [00:02<00:02, 77.47it/s]Feature extracting:  49%|████▉     | 199/407 [00:02<00:02, 77.90it/s]Feature extracting:  51%|█████     | 208/407 [00:02<00:02, 79.54it/s]Feature extracting:  53%|█████▎    | 217/407 [00:02<00:02, 81.01it/s]Feature extracting:  56%|█████▌    | 226/407 [00:02<00:02, 81.86it/s]Feature extracting:  58%|█████▊    | 235/407 [00:02<00:02, 82.76it/s]Feature extracting:  60%|█████▉    | 244/407 [00:03<00:01, 83.30it/s]Feature extracting:  62%|██████▏   | 253/407 [00:03<00:01, 83.70it/s]Feature extracting:  64%|██████▍   | 262/407 [00:03<00:01, 84.04it/s]Feature extracting:  67%|██████▋   | 271/407 [00:03<00:01, 84.11it/s]Feature extracting:  69%|██████▉   | 280/407 [00:03<00:01, 84.20it/s]Feature extracting:  71%|███████   | 289/407 [00:03<00:01, 85.29it/s]Feature extracting:  73%|███████▎  | 298/407 [00:03<00:01, 85.10it/s]Feature extracting:  75%|███████▌  | 307/407 [00:03<00:01, 85.15it/s]Feature extracting:  78%|███████▊  | 316/407 [00:03<00:01, 85.11it/s]Feature extracting:  80%|███████▉  | 325/407 [00:03<00:00, 85.00it/s]Feature extracting:  82%|████████▏ | 334/407 [00:04<00:00, 84.96it/s]Feature extracting:  84%|████████▍ | 343/407 [00:04<00:00, 84.88it/s]Feature extracting:  86%|████████▋ | 352/407 [00:04<00:00, 84.71it/s]Feature extracting:  89%|████████▊ | 361/407 [00:04<00:00, 84.67it/s]Feature extracting:  91%|█████████ | 370/407 [00:04<00:00, 84.67it/s]Feature extracting:  93%|█████████▎| 379/407 [00:04<00:00, 84.61it/s]Feature extracting:  95%|█████████▌| 388/407 [00:04<00:00, 84.60it/s]Feature extracting:  98%|█████████▊| 397/407 [00:04<00:00, 84.69it/s]Feature extracting: 100%|█████████▉| 406/407 [00:04<00:00, 84.74it/s]Feature extracting: 100%|██████████| 407/407 [00:04<00:00, 81.91it/s]
+Feature extracting:   0%|          | 0/407 [00:00<?, ?it/s]Feature extracting:   3%|▎         | 13/407 [00:00<00:03, 127.88it/s]Feature extracting:   6%|▋         | 26/407 [00:00<00:03, 102.86it/s]Feature extracting:   9%|▉         | 37/407 [00:00<00:04, 90.53it/s] Feature extracting:  12%|█▏        | 47/407 [00:00<00:04, 85.35it/s]Feature extracting:  14%|█▍        | 56/407 [00:00<00:04, 82.63it/s]Feature extracting:  16%|█▌        | 65/407 [00:00<00:04, 80.85it/s]Feature extracting:  18%|█▊        | 74/407 [00:00<00:04, 79.68it/s]Feature extracting:  20%|██        | 82/407 [00:00<00:04, 79.00it/s]Feature extracting:  22%|██▏       | 90/407 [00:01<00:04, 78.31it/s]Feature extracting:  24%|██▍       | 98/407 [00:01<00:03, 77.86it/s]Feature extracting:  26%|██▌       | 106/407 [00:01<00:03, 77.66it/s]Feature extracting:  28%|██▊       | 114/407 [00:01<00:03, 77.49it/s]Feature extracting:  30%|██▉       | 122/407 [00:01<00:03, 77.44it/s]Feature extracting:  32%|███▏      | 130/407 [00:01<00:03, 77.21it/s]Feature extracting:  34%|███▍      | 138/407 [00:01<00:03, 77.08it/s]Feature extracting:  36%|███▌      | 146/407 [00:01<00:03, 76.98it/s]Feature extracting:  38%|███▊      | 154/407 [00:01<00:03, 77.13it/s]Feature extracting:  40%|███▉      | 162/407 [00:02<00:03, 77.13it/s]Feature extracting:  42%|████▏     | 170/407 [00:02<00:03, 77.15it/s]Feature extracting:  44%|████▎     | 178/407 [00:02<00:02, 77.12it/s]Feature extracting:  46%|████▌     | 186/407 [00:02<00:02, 76.86it/s]Feature extracting:  48%|████▊     | 194/407 [00:02<00:02, 76.91it/s]Feature extracting:  50%|████▉     | 202/407 [00:02<00:02, 77.00it/s]Feature extracting:  52%|█████▏    | 210/407 [00:02<00:02, 76.98it/s]Feature extracting:  54%|█████▎    | 218/407 [00:02<00:02, 76.91it/s]Feature extracting:  56%|█████▌    | 226/407 [00:02<00:02, 76.97it/s]Feature extracting:  57%|█████▋    | 234/407 [00:02<00:02, 76.83it/s]Feature extracting:  59%|█████▉    | 242/407 [00:03<00:02, 76.88it/s]Feature extracting:  62%|██████▏   | 251/407 [00:03<00:01, 79.19it/s]Feature extracting:  64%|██████▍   | 260/407 [00:03<00:01, 80.48it/s]Feature extracting:  66%|██████▌   | 269/407 [00:03<00:01, 79.28it/s]Feature extracting:  68%|██████▊   | 278/407 [00:03<00:01, 79.95it/s]Feature extracting:  71%|███████   | 287/407 [00:03<00:01, 80.71it/s]Feature extracting:  73%|███████▎  | 296/407 [00:03<00:01, 81.26it/s]Feature extracting:  75%|███████▍  | 305/407 [00:03<00:01, 82.11it/s]Feature extracting:  77%|███████▋  | 314/407 [00:03<00:01, 81.56it/s]Feature extracting:  79%|███████▉  | 323/407 [00:04<00:01, 82.49it/s]Feature extracting:  82%|████████▏ | 332/407 [00:04<00:00, 82.53it/s]Feature extracting:  84%|████████▍ | 341/407 [00:04<00:00, 82.57it/s]Feature extracting:  86%|████████▌ | 350/407 [00:04<00:00, 83.29it/s]Feature extracting:  88%|████████▊ | 359/407 [00:04<00:00, 82.57it/s]Feature extracting:  90%|█████████ | 368/407 [00:04<00:00, 83.12it/s]Feature extracting:  93%|█████████▎| 377/407 [00:04<00:00, 83.03it/s]Feature extracting:  95%|█████████▍| 386/407 [00:04<00:00, 82.56it/s]Feature extracting:  97%|█████████▋| 395/407 [00:04<00:00, 83.11it/s]Feature extracting:  99%|█████████▉| 404/407 [00:05<00:00, 83.52it/s]Feature extracting: 100%|██████████| 407/407 [00:05<00:00, 80.45it/s]
+Feature extracting:   0%|          | 0/1 [00:00<?, ?it/s]Feature extracting: 100%|██████████| 1/1 [00:00<00:00, 16.09it/s]
+Train Epoch: 1 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 1}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 1}
+Train Epoch: 2 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 2}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 2}
+Train Epoch: 3 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 3}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 3}
+Train Epoch: 4 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 4}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 4}
+Train Epoch: 5 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 5}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 5}
+Train Epoch: 6 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 6}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 6}
+Train Epoch: 7 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 7}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 7}
+Train Epoch: 8 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 8}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 8}
+Train Epoch: 9 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 9}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 9}
+Train Epoch: 10 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 10}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 10}
+Train Epoch: 11 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 11}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 11}
+Train Epoch: 12 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 12}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 12}
+Train Epoch: 13 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 13}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 13}
+Train Epoch: 14 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 14}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 14}
+Train Epoch: 15 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 15}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 15}
+Train Epoch: 16 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 16}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 16}
+Train Epoch: 17 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 17}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 17}
+Train Epoch: 18 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 18}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 18}
+Train Epoch: 19 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 19}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 19}
+Train Epoch: 20 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 20}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 20}
+Train Epoch: 21 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 21}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 21}
+Train Epoch: 22 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 22}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 22}
+Train Epoch: 23 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 23}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 23}
+Train Epoch: 24 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 24}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 24}
+Train Epoch: 25 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 25}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 25}
+Train Epoch: 26 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 26}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 26}
+Train Epoch: 27 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 27}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 27}
+Train Epoch: 28 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 28}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 28}
+Train Epoch: 29 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 29}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 29}
+Train Epoch: 30 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 30}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 30}
+Train Epoch: 31 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 31}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 31}
+Train Epoch: 32 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 32}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 32}
+Train Epoch: 33 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 33}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 33}
+Train Epoch: 34 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 34}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 34}
+Train Epoch: 35 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 35}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 35}
+Train Epoch: 36 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 36}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 36}
+Train Epoch: 37 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 37}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 37}
+Train Epoch: 38 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 38}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 38}
+Train Epoch: 39 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 39}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 39}
+Train Epoch: 40 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 40}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 40}
+Train Epoch: 41 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 41}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 41}
+Train Epoch: 42 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 42}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 42}
+Train Epoch: 43 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 43}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 43}
+Train Epoch: 44 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 44}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 44}
+Train Epoch: 45 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 45}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 45}
+Train Epoch: 46 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 46}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 46}
+Train Epoch: 47 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 47}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 47}
+Train Epoch: 48 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 48}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 48}
+Train Epoch: 49 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 49}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 49}
+Train Epoch: 50 	Loss: nan
+{"metric": "Eval - Backdoored Accuracy (BA)", "value": 6.699446834665028, "epoch": 50}
+{"metric": "Eval - Attack Success Rate (ASR)", "value": 0.0, "epoch": 50}

@@ -1,0 +1,23 @@
+# Data directory (too heavy to put on git)
+data/
+
+# Output directory (models, logs, etc.)
+output/
+
+# Virtual environment
+.venv/
+
+# Misc exclusions
+__pycache__/
+*.py[cod]
+*$py.class
+environment.*
+*.png
+compare*
+compress*
+generate*
+inspect*
+temp*
+visualize*
+zero*
+misc*
