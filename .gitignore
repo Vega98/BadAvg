@@ -13,12 +13,13 @@ __pycache__/
 *$py.class
 environment.*
 *.png
-compare*
+compare_updates_old*
 compress*
 generate*
 inspect*
 temp*
 visualize*
+analyze*
 zero*
 misc*
 *.zip
