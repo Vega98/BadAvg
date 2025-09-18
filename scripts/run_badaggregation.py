@@ -49,8 +49,8 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
     # Create directories
     # Caution: if using in monkey, change path to /Experiments/davidef98/output
     #results_dir = '/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/'
-    #results_dir = "/Experiments/davidef98/output/temp/"
-    results_dir = "/home/vega/Documenti/BadEncoder/output/temp/"
+    results_dir = "/Experiments/davidef98/output/temp/"
+    #results_dir = "/home/vega/Documenti/BadEncoder/output/temp/"
     # If using in run_federated.py clean encoder is a full path, so no need to prefix it.
     pretrained_encoder = clean_encoder
     #pretrained_encoder = f'./output/{clean_encoder}'
