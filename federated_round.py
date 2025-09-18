@@ -186,7 +186,7 @@ def federated_poison_round(
                 clean_local = client_models[i], # For train-and-scale
                 gpu=args.gpu,
                 shadow_dataset= args.shadow_dataset,
-                pretrain_dataset= args.pretraining_dataset
+                pretrain_dataset= args.pretrain_dataset
                 )
             client_models[i] = poisoned_path
         else:
