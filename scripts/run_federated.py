@@ -22,18 +22,18 @@ from models import get_encoder_architecture
 """ EDIT THIS KNOBS TO CHANGE EXPERIMENT SETTINGS """
 
 # Main parameters (change at will)
-NUM_ROUNDS = 100 # Total number of federated rounds
-BAD_ROUNDS = -1 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
-OUTPUT_DIR = "./output/federated_exp_test" # Output directory for logs, models, plots
+NUM_ROUNDS = 150 # Total number of federated rounds
+BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+OUTPUT_DIR = "/Experiments/davidef98/output/badavg_finetune_50_cifar_iid" # Output directory for logs, models, plots
 PRETRAIN_DATASET = "cifar10" # Dataset for pre-training (either "cifar10" or "stl10")
 SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
 DOWNSTREAM_DATASET = "stl10" # Dataset for evaluation 
 DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
-ATTACK = 0 # 0 for no attack (clean federated experiment), 1 for Naive, 2 for BadAvg, 3 for BAGEL
+ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for Naive, 2 for BadAvg, 3 for BAGEL
 DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 
-CHECKPOINT = None # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
-RESUME_ROUND = 0 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
+CHECKPOINT = "/Experiments/davidef98/output/clean_100_cifar_iid/models/model_round99.pth" # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
+RESUME_ROUND = 99 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
 
 # Hardcoded / specific parameters (be sure you know what you are doing if you change these)
 NUM_CLIENTS = 10 # Total number of clients for experiment. Unless you change the dataset partitions, keep it at 10.
@@ -303,7 +303,7 @@ def main():
         learning_rate=FEDAVG_LEARNING_RATE, # Learing rate for fedavg
         gpu = TRAINING_GPU_ID,
         bagel = True if ATTACK in [2,3] else False,
-        naive = 1 if ATTACK == 2 else 0,
+        naive = 1 if ATTACK == 3 else 0,
         current_round=0,
         pretrain_dataset=PRETRAIN_DATASET,
         shadow_dataset=SHADOW_DATASET

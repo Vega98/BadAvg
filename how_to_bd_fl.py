@@ -21,7 +21,7 @@ def compute_update_norm(local_model, global_model) -> torch.Tensor:
 
         return torch.norm(update_vector)
 
-def compute_local_encoder(global_model, poisoned_model, clean_local_model, num_clients: int, learning_rate: float, train_and_scale=True) -> Dict:
+def compute_local_encoder(global_model, poisoned_model, clean_local_model, num_clients: int, learning_rate: float, train_and_scale=False) -> Dict:
     """
     Computes the local encoder L using the equation: L = n/k(X-G) + G
     
