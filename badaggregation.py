@@ -110,7 +110,8 @@ class BadAggregation:
                   tolerance,
                   clipnoise,
                   neurotoxin_mask,
-                  previous_global_model) -> float:
+                  #previous_global_model
+                  ) -> float:
 
         # Freeze BatchNorm layers in local encoder and keep global model in eval mode
         local_encoder.train()

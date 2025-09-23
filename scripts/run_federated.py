@@ -29,7 +29,7 @@ PRETRAIN_DATASET = "cifar10" # Dataset for pre-training (either "cifar10" or "st
 SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
 DOWNSTREAM_DATASET = "stl10" # Dataset for evaluation 
 DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
-ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for Naive, 3 for BAGEL
+ATTACK = 3 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
 DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 
 CHECKPOINT = "/Experiments/davidef98/output/clean_100_cifar_iid/models/model_round99.pth" # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
@@ -299,7 +299,7 @@ def main():
         num_malicious=BAD_CLIENTS,
         num_benign=NUM_CLIENTS - BAD_CLIENTS,
         global_model_path='',
-        previous_global_model='', # Path to previous global model (for neurotoxin)
+        #previous_global_model='', # Path to previous global model (for neurotoxin)
         learning_rate=FEDAVG_LEARNING_RATE, # Learing rate for fedavg
         gpu = TRAINING_GPU_ID,
         bagel = True if ATTACK in [2,3] else False,
