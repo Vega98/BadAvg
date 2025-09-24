@@ -302,7 +302,8 @@ if __name__ == '__main__':
                     poisoned_model=model,
                     clean_local_model=clean_local_model,
                     num_clients=10,  # Hardcoded value, it's always the same in our experiments...
-                    learning_rate=1.0 # Same as above (CHANGE TO 1.0 IF CLIP&NOISE!)
+                    learning_rate=0.25, # Same as above (0.25 is standard, 1 for clip&noise!)
+                    train_and_scale=False # True if clip&noise, false for no defenses
                 )
                 model.load_state_dict(computed_local_encoder)
             torch.save({'epoch': epoch, 'state_dict': model.state_dict(), 'optimizer' : optimizer.state_dict(),}, args.results_dir + '/' + args.name + '.pth')
