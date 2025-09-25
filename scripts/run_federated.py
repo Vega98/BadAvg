@@ -262,16 +262,7 @@ def main():
     num_rounds = NUM_ROUNDS
     bad_round = BAD_ROUNDS
     experiment_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    # If running on monkey, use this:
-    #base_output_dir = f"/Experiments/davidef98/output/federated_exp_{experiment_timestamp}"
-    #base_output_dir = f"/Experiments/davidef98/output/badavg_clipnoise_iid"
-    # If running on local machine, use this:
-    #base_output_dir = f"./output/federated_exp_{experiment_timestamp}"
-    # If testing, use this path (to avoid flooding output folder with a lot of folders):
-    #base_output_dir = "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/"
     base_output_dir = OUTPUT_DIR
-    #base_output_dir = "/Experiments/davidef98/output/resnet18_ablation/"
-    #base_output_dir = f"./output/federated_exp_test"
     os.makedirs(base_output_dir, exist_ok=True)
     
     # Metrics tracking
@@ -334,12 +325,8 @@ def main():
             if CHECKPOINT:
                 args.global_model_path = CHECKPOINT
 
-            # manual reboot
-            '''
-            if round_num == 199:
-                args.global_model_path = "/home/vega/Documenti/BadEncoder/output/resnet18_ablation/models/model_round198.pth"
-            else:
-            '''
+
+
             if round_num > 0:  # Skip first round since there's no previous model
                 prev_model_path = os.path.join(models_dir, f"model_round{round_num-1}.pth")
                 if os.path.exists(prev_model_path):

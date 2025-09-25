@@ -199,25 +199,25 @@ if __name__ == "__main__":
     # Define models with their ASR values
     models_info = {
         'Clean': {
-            'model': '/home/vega/Documenti/BadEncoder/output/federated_exp_cifarnoiid/temp_round/pretrain/model_ft_c0.pth',
+            'model': './output/federated_exp_cifarnoiid/temp_round/pretrain/model_ft_c0.pth',
             'asr': 0.1153  # Clean model has 0% attack success
         },
         'Naive': {
-            'model': '/home/vega/Documenti/BadEncoder/output/federated_exp_cifarnoiid/naive.pth',
+            'model': './output/federated_exp_cifarnoiid/naive.pth',
             'asr': 0.9998  # 85% attack success rate
         },
         'BadAvg': {
-            'model': '/home/vega/Documenti/BadEncoder/output/federated_exp_cifarnoiid/badavg.pth',
+            'model': './output/federated_exp_cifarnoiid/badavg.pth',
             'asr': 0.9982
         },
         'BAGEL': {
-            'model': '/home/vega/Documenti/BadEncoder/output/federated_exp_cifarnoiid/bagel100.pth',
+            'model': './output/federated_exp_cifarnoiid/bagel100.pth',
             'asr': 0.9998
         }
     }
    
     # Load global model
-    global_model = torch.load('/home/vega/Documenti/BadEncoder/output/federated_exp_cifarnoiid/models/model_round198.pth')
+    global_model = torch.load('./output/federated_exp_cifarnoiid/models/model_round198.pth')
    
     # Create visualization
     fig, ax = plot_update_norms(models_info, global_model)

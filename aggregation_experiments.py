@@ -447,23 +447,10 @@ def clip_and_noise(updates: List[str],
 
 if __name__ == "__main__":
     # Define paths
-    #global_model_path = "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/models/model_round99.pth"
-    global_model_path = "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/badavg_aggr_test.pth"  # Path to the global model
-    output_path = "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/badavg_aggr_test.pth"
-    updates = [
-        "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/temp_round/pretrain/model_ft_c0.pth",
-        "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/temp_round/pretrain/model_ft_c1.pth",
-        "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/temp_round/pretrain/model_ft_c2.pth",
-        "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/temp_round/pretrain/model_ft_c4.pth",
-        "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/temp_round/pretrain/model_ft_c5.pth",
-        "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/temp_round/pretrain/model_ft_c6.pth",
-        "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/temp_round/pretrain/model_ft_c7.pth",
-        "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/temp_round/pretrain/model_ft_c8.pth",
-        "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/temp_round/pretrain/model_ft_c9.pth",
-        "/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/temp_round/pretrain/model_ft_c3.pth",
-        #"/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/badavg_test.pth"
-        #"/home/vega/Documenti/BadEncoder/output/federated_exp_cifariid/checkpoints/round_150/pretrain/model_ft_c9.pth",   
-    ]
+    #global_model_path = ""
+    global_model_path = ""  # Path to the global model
+    output_path = ""
+    updates = []
     '''
     SCRIPT FOR TESTING WITH 100 "EMPTY" UPDATES
 

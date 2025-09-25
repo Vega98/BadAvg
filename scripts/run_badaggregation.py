@@ -48,11 +48,6 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
     )
     
     # Create directories
-    # Caution: if using in monkey, change path to /Experiments/davidef98/output
-    #results_dir = '/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/'
-    #results_dir = "/Experiments/davidef98/output/temp/"
-    #results_dir = "/home/vega/Documenti/BadEncoder/output/temp/"
-    # If using in run_federated.py clean encoder is a full path, so no need to prefix it.
     pretrained_encoder = clean_encoder
     #pretrained_encoder = f'./output/{clean_encoder}'
     results_dir = os.path.join(output_dir, "temp")
@@ -69,13 +64,6 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
     clean_local_model = get_encoder_architecture_usage(args).cuda()
     poisoned_local_model = get_encoder_architecture_usage(args).cuda()
 
-    # For neurotoxin
-    #previous_global = get_encoder_architecture_usage(args).cuda()
-    
-    # Load pretrained weights.
-    # Poisoned local model is initialized with the clean global model, as expected
-    # also for the clean local models
-    #poisoned_model = '/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/computed_local_encoder.pth'
     
     if pretrained_encoder:
         checkpoint = torch.load(pretrained_encoder)
@@ -83,10 +71,6 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
         clean_global_model.load_state_dict(checkpoint['state_dict'])
         poisoned_local_model.load_state_dict(checkpoint['state_dict'])
         #poisoned_local_model.load_state_dict(poisoned['state_dict'])
-
-        # For neurotoxin, load also the previous model round 
-        #previous_checkpoint = torch.load(previous_global_model)
-        #previous_global.load_state_dict(previous_checkpoint['state_dict'])
 
         # Load also the clean local model of the malicious client
         clean = torch.load(clean_local)

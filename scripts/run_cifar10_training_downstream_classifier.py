@@ -26,5 +26,5 @@ def run_eval(gpu, encoder_usage_info, downstream_dataset, encoder, reference_lab
 # Run evals for stl10, gtsrb and svhn downstream dataset respectively
 #run_eval(0, 'cifar10', 'stl10', './output/cifar10/stl10_backdoored_encoder/aggregated/avg_badagg.pth', 9, './trigger/trigger_pt_white_21_10_ap_replace.npz', 'truck', 'backdoor')
 #run_eval(0, 'cifar10', 'gtsrb', './output/cifar10/stl10_backdoored_encoder/aggregated/avg_badagg.pth', 12, './trigger/trigger_pt_white_21_10_ap_replace.npz', 'priority', 'backdoor')
-run_eval(0, 'cifar10', 'stl10', '/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/badavg_aggr_test.pth', 9, './trigger/trigger_pt_white_21_10_ap_replace.npz', 'truck')
+run_eval(0, 'cifar10', 'stl10', './output/resnet18_per_badaggregation_test/badavg_aggr_test.pth', 9, './trigger/trigger_pt_white_21_10_ap_replace.npz', 'truck')
 #run_eval(0, 'cifar10', 'svhn', './output/cifar10/clean_encoder/model_100.pth', 1, './trigger/trigger_pt_white_21_10_ap_replace.npz', 'one', 'backdoor')
