@@ -4,10 +4,9 @@ if not os.path.exists('./log/bad_encoder'):
     os.makedirs('./log/bad_encoder')
 
 # Modified clean_encoder default (using 100 epochs model, not 1000)
-def run_finetune(gpu, encoder_usage_info, shadow_dataset, downstream_dataset, trigger, reference, clean_encoder='resnet18_per_badaggregation_test/models/model_round99.pth'):
+def run_finetune(gpu, encoder_usage_info, shadow_dataset, downstream_dataset, trigger, reference, clean_encoder):
 
-    #save_path = f'./output/{encoder_usage_info}/{downstream_dataset}_backdoored_encoder'
-    save_path = '/home/vega/Documenti/BadEncoder/output/resnet18_per_badaggregation_test/'
+    save_path = ''
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 

@@ -22,29 +22,51 @@ from models import get_encoder_architecture
 """ EDIT THIS KNOBS TO CHANGE EXPERIMENT SETTINGS """
 
 # Main parameters (change at will)
-NUM_ROUNDS = 150 # Total number of federated rounds
-BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
-OUTPUT_DIR = "/Experiments/davidef98/output/badavg_finetune_50_cifar_iid" # Output directory for logs, models, plots
+NUM_ROUNDS = 100#150 # Total number of federated rounds
+BAD_ROUNDS = 2#10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+OUTPUT_DIR = "./output/test"#"/Experiments/davidef98/output/badavg_finetune_50_cifar_iid" # Output directory for logs, models, plots
 PRETRAIN_DATASET = "cifar10" # Dataset for pre-training (either "cifar10" or "stl10")
-SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
-DOWNSTREAM_DATASET = "stl10" # Dataset for evaluation 
+SHADOW_DATASET = "cifar10"#"cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
+DOWNSTREAM_DATASET = "gtsrb"#"stl10" # Dataset for evaluation 
 DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
-ATTACK = 3 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
+ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
 DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 
-CHECKPOINT = "/Experiments/davidef98/output/clean_100_cifar_iid/models/model_round99.pth" # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
-RESUME_ROUND = 99 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
+CHECKPOINT = "/home/vega/Documenti/BadEncoder/misc/model_round99.pth"#"/Experiments/davidef98/output/clean_100_cifar_iid/models/model_round99.pth" # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
+RESUME_ROUND = 99#99 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
 
 # Hardcoded / specific parameters (be sure you know what you are doing if you change these)
 NUM_CLIENTS = 10 # Total number of clients for experiment. Unless you change the dataset partitions, keep it at 10.
 BAD_CLIENTS = 1 # Attack was designed for 1 attacker, but this can be changed
-CLIENT_EPOCHS = 5 # Number of local epochs for each client during pre-training
-BACKDOOR_EPOCHS = 10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
+CLIENT_EPOCHS = 1#5 # Number of local epochs for each client during pre-training
+BACKDOOR_EPOCHS = 10#10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
 FEDAVG_LEARNING_RATE = 0.25 # Learning rate for FedAvg
 TRAINING_GPU_ID = 0 # GPU ID for training (if not sure, leave at 0)
 EVAL_GPU_ID = 0 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
 DOWNSTREAM_EPOCHS = 50 # Number of epochs to train downstream classifier during evaluation after each round (higher = slightly better accuracy, but slower)
 
+
+# Checking: pretrain must me either cifar10 or stl10 and pretrain must be different from downstream!
+if PRETRAIN_DATASET == DOWNSTREAM_DATASET:
+    raise ValueError("Pretrain dataset must be different from downstream dataset!")
+if PRETRAIN_DATASET not in ["cifar10", "stl10"]:
+    raise ValueError(f"Unsupported pretrain dataset {PRETRAIN_DATASET}, must be either cifar10 or stl10")
+
+# Building reference path and reference label for attack.
+if DOWNSTREAM_DATASET == "stl10":
+    REFERENCE_PATH = f"./reference/{PRETRAIN_DATASET}/truck.npz"
+    REFERENCE_LABEL = 9
+elif DOWNSTREAM_DATASET == "gtsrb":
+    REFERENCE_PATH = f"./reference/{PRETRAIN_DATASET}/priority.npz"
+    REFERENCE_LABEL = 12
+elif DOWNSTREAM_DATASET == "svhn":
+    REFERENCE_PATH = f"./reference/{PRETRAIN_DATASET}/one.npz"
+    REFERENCE_LABEL = 1
+else:
+    raise ValueError(f"Unsupported downstream dataset {DOWNSTREAM_DATASET} for pretrain cifar10")
+
+
+    
 
 def extract_metrics(log_file):
     """Extract final BA and ASR metrics from evaluation log file"""
@@ -102,9 +124,9 @@ def evaluate_model(model_path, round_num, output_dir, downstream_epochs, gpu):
         --dataset {DOWNSTREAM_DATASET} \
         --encoder {model_path} \
         --encoder_usage_info {PRETRAIN_DATASET} \
-        --reference_label 9 \
+        --reference_label {REFERENCE_LABEL} \
         --trigger_file ./trigger/trigger_pt_white_21_10_ap_replace.npz \
-        --reference_file ./reference/{PRETRAIN_DATASET}/truck.npz \
+        --reference_file {REFERENCE_PATH} \
         --gpu {gpu} \
         --nn_epochs {downstream_epochs} \
         > {eval_log}""" 
@@ -300,6 +322,9 @@ def main():
         shadow_dataset=SHADOW_DATASET
     )
 
+    
+    
+
     # Define checkpoint rounds (rounds for which we save all intermediate updates)
     checkpoint_rounds = []
     temp_round_dir = os.path.join(base_output_dir, "temp_round")
@@ -353,7 +378,8 @@ def main():
                     backdoor_epochs=BACKDOOR_EPOCHS, #1 for testing, 10 default (2 for badavg)
                     output_dir=round_dir,
                     trigger_path="./trigger/trigger_pt_white_21_10_ap_replace.npz",
-                    reference_path=f"./reference/{PRETRAIN_DATASET}/truck.npz",
+                    #reference_path=f"./reference/{PRETRAIN_DATASET}/truck.npz",
+                    reference_path=REFERENCE_PATH,
                     args=args,
                 )
             else:

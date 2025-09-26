@@ -205,7 +205,9 @@ def federated_poison_round(
                             #previous_global_model= args.previous_global_model,
                             encoder_usage_info= pretraining_dataset,
                             shadow_dataset= args.shadow_dataset,
-                            output_dir = output_dir)
+                            output_dir = output_dir,
+                            reference_path = reference_path
+                            )
             client_models[i] = poisoned_path
     
     # 3. Aggregate all models

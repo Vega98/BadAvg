@@ -18,7 +18,7 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
                         shadow_dataset: str = 'cifar10',
                         downstream_dataset: str = 'stl10',
                         trigger: str = 'trigger_pt_white_21_10_ap_replace.npz',
-                        reference: str = 'truck',
+                        reference_path: str = 'truck',
                         clean_encoder: str = '',
                         num_clients: int = 10, #proof of concept: 2 default 10
                         fed_lr: float = 0.25, #proof of concept:1 defaylt 0.25
@@ -27,7 +27,7 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
                         lambda1: float = 1.0,
                         lambda2: float = 1.0,
                         epochs: int = 1,
-                        reference_label: int = 9,
+                        reference_label: int = 0, # Default 0 also in badencoder.py
                         name: str = 'badaggregation_test',
                         clean_local: str = '',
                         clipnoise: bool = False,
@@ -39,13 +39,16 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
     
     # Packaging args for get_shadow_dataset (#1) and get_encoder_architecture_usage (#2) routines
     args = argparse.Namespace(
-        reference_file=f'./reference/{encoder_usage_info}/{reference}.npz',#1
+        reference_file=reference_path,#1
         trigger_file=f'./trigger/{trigger}',#1
         shadow_dataset=shadow_dataset,#1
         data_dir=f'./data/{shadow_dataset.split("_")[0]}/',#1
         reference_label=reference_label,#1
         encoder_usage_info=encoder_usage_info,#2
     )
+
+    # Print args
+    print(args)
     
     # Create directories
     pretrained_encoder = clean_encoder
@@ -63,6 +66,8 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
     clean_global_model = get_encoder_architecture_usage(args).cuda()
     clean_local_model = get_encoder_architecture_usage(args).cuda()
     poisoned_local_model = get_encoder_architecture_usage(args).cuda()
+
+    
 
     
     if pretrained_encoder:
