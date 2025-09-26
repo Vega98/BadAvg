@@ -22,24 +22,24 @@ from models import get_encoder_architecture
 """ EDIT THIS KNOBS TO CHANGE EXPERIMENT SETTINGS """
 
 # Main parameters (change at will)
-NUM_ROUNDS = 100#150 # Total number of federated rounds
-BAD_ROUNDS = 2#10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
-OUTPUT_DIR = "./output/test"#"/Experiments/davidef98/output/badavg_finetune_50_cifar_iid" # Output directory for logs, models, plots
+NUM_ROUNDS = 150 # Total number of federated rounds
+BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+OUTPUT_DIR = "/Experiments/davidef98/output/badavg_finetune_50_stl_iid" # Output directory for logs, models, plots
 PRETRAIN_DATASET = "cifar10" # Dataset for pre-training (either "cifar10" or "stl10")
-SHADOW_DATASET = "cifar10"#"cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
-DOWNSTREAM_DATASET = "gtsrb"#"stl10" # Dataset for evaluation 
+SHADOW_DATASET = "stl10" # Shadow dataset for attack (either "cifar10" or "stl10")
+DOWNSTREAM_DATASET = "svhn" # Dataset for evaluation 
 DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
 ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
 DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 
-CHECKPOINT = "/home/vega/Documenti/BadEncoder/misc/model_round99.pth"#"/Experiments/davidef98/output/clean_100_cifar_iid/models/model_round99.pth" # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
-RESUME_ROUND = 99#99 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
+CHECKPOINT = "/Experiments/davidef98/output/clean_100_cifar_iid/models/model_round99.pth" # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
+RESUME_ROUND = 99 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
 
 # Hardcoded / specific parameters (be sure you know what you are doing if you change these)
 NUM_CLIENTS = 10 # Total number of clients for experiment. Unless you change the dataset partitions, keep it at 10.
 BAD_CLIENTS = 1 # Attack was designed for 1 attacker, but this can be changed
-CLIENT_EPOCHS = 1#5 # Number of local epochs for each client during pre-training
-BACKDOOR_EPOCHS = 10#10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
+CLIENT_EPOCHS = 5 # Number of local epochs for each client during pre-training
+BACKDOOR_EPOCHS = 10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
 FEDAVG_LEARNING_RATE = 0.25 # Learning rate for FedAvg
 TRAINING_GPU_ID = 0 # GPU ID for training (if not sure, leave at 0)
 EVAL_GPU_ID = 0 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
