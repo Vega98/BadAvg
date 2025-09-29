@@ -5,7 +5,7 @@ from torchvision.models.resnet import resnet18, resnet34, resnet50
 
 class SimCLRBase(nn.Module):
 
-    def __init__(self, arch='resnet18'):
+    def __init__(self, arch='resnet50'):
         super(SimCLRBase, self).__init__()
 
         self.f = []
@@ -32,7 +32,7 @@ class SimCLRBase(nn.Module):
         return feature
 
 class SimCLR(nn.Module):
-    def __init__(self, feature_dim=128, arch='resnet18'):
+    def __init__(self, feature_dim=128, arch='resnet50'):
         super(SimCLR, self).__init__()
 
         self.f = SimCLRBase(arch)

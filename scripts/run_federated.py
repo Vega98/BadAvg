@@ -22,18 +22,18 @@ from models import get_encoder_architecture
 """ EDIT THIS KNOBS TO CHANGE EXPERIMENT SETTINGS """
 
 # Main parameters (change at will)
-NUM_ROUNDS = 150 # Total number of federated rounds
-BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
-OUTPUT_DIR = "/Experiments/davidef98/output/badavg_finetune_50_stl_iid" # Output directory for logs, models, plots
-PRETRAIN_DATASET = "cifar10" # Dataset for pre-training (either "cifar10" or "stl10")
-SHADOW_DATASET = "stl10" # Shadow dataset for attack (either "cifar10" or "stl10")
-DOWNSTREAM_DATASET = "svhn" # Dataset for evaluation 
+NUM_ROUNDS = 100 # Total number of federated rounds
+BAD_ROUNDS = -1 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+OUTPUT_DIR = "/Experiments/davidef98/output/clean_100_stl_iid" # Output directory for logs, models, plots
+PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
+SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
+DOWNSTREAM_DATASET = "gtsrb" # Dataset for evaluation 
 DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
-ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
+ATTACK = 0 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
 DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 
-CHECKPOINT = "/Experiments/davidef98/output/clean_100_cifar_iid/models/model_round99.pth" # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
-RESUME_ROUND = 99 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
+CHECKPOINT = None # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
+RESUME_ROUND = 0 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
 
 # Hardcoded / specific parameters (be sure you know what you are doing if you change these)
 NUM_CLIENTS = 10 # Total number of clients for experiment. Unless you change the dataset partitions, keep it at 10.
@@ -42,9 +42,11 @@ CLIENT_EPOCHS = 5 # Number of local epochs for each client during pre-training
 BACKDOOR_EPOCHS = 10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
 FEDAVG_LEARNING_RATE = 0.25 # Learning rate for FedAvg
 TRAINING_GPU_ID = 0 # GPU ID for training (if not sure, leave at 0)
-EVAL_GPU_ID = 0 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
+EVAL_GPU_ID = 1 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
 DOWNSTREAM_EPOCHS = 50 # Number of epochs to train downstream classifier during evaluation after each round (higher = slightly better accuracy, but slower)
 
+EVAL_ONLY = False # If True, skips training and only evaluates models in MODELS_DIR
+MODELS_DIR = None # Directory containing models to evaluate (required if EVAL_ONLY is True)
 
 # Checking: pretrain must me either cifar10 or stl10 and pretrain must be different from downstream!
 if PRETRAIN_DATASET == DOWNSTREAM_DATASET:
@@ -280,174 +282,221 @@ class EvaluationManager:
             print("Evaluation worker thread stopped")
 
 def main():
-    # Experiment parameters
-    num_rounds = NUM_ROUNDS
-    bad_round = BAD_ROUNDS
-    experiment_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    base_output_dir = OUTPUT_DIR
-    os.makedirs(base_output_dir, exist_ok=True)
+    # Evaluation only mode, skip traning and evaluate existing checkpoints
+    if EVAL_ONLY:
+        if not MODELS_DIR:
+            raise ValueError("MODELS_DIR is required in eval-only mode")
     
-    # Metrics tracking
-    train_loss_values = []
-    test_accuracy_values = []
-    rounds = list(range(1, num_rounds + 1))
-    
-    # Log file setup
-    log_file = os.path.join(base_output_dir, "metrics.log")
+        # Set up evaluation manager
+        eval_manager = EvaluationManager(OUTPUT_DIR, os.path.join(OUTPUT_DIR, "metrics.log"))
+        eval_manager.start_worker()
 
-    # Initialize evaluation manager
-    eval_manager = EvaluationManager(base_output_dir, log_file)
-    eval_manager.start_worker()
-    
-    # Initial model path, put 'fs' for "from-scratch" training
-    #current_model = "./output/cifar10/clean_encoder/model_100.pth"
-    current_model = 'fs'
+        try:
+            checkpoints = sorted([f for f in os.listdir(MODELS_DIR) if f.endswith(".pth")], 
+                                key=lambda x: int(x.split("round")[1].split(".")[0]))
+            print(f"Found {len(checkpoints)} checkpoints for evaluation")
 
-    # Misc. args for defense mechanism and training
-    # For BAGEL, set args.bagel = True and naive = 0
-    # For "naive" Bagdasarian + BadEncoder, set args.bagel = True and naive = 1
-    args = argparse.Namespace(
-        defense='clipnoise' if DEFENSE == 1 else 'none',  # 'clipnoise' or 'none' for no defense
-        trusted_update_path='',
-        num_malicious=BAD_CLIENTS,
-        num_benign=NUM_CLIENTS - BAD_CLIENTS,
-        global_model_path='',
-        #previous_global_model='', # Path to previous global model (for neurotoxin)
-        learning_rate=FEDAVG_LEARNING_RATE, # Learing rate for fedavg
-        gpu = TRAINING_GPU_ID,
-        bagel = True if ATTACK in [2,3] else False,
-        naive = 1 if ATTACK == 3 else 0,
-        current_round=0,
-        pretrain_dataset=PRETRAIN_DATASET,
-        shadow_dataset=SHADOW_DATASET
-    )
+            # Evaluate each checkpoint
+            for ckpt in checkpoints:
+                round_num = int(ckpt.split("round")[1].split(".")[0])
+                model_path = os.path.join(MODELS_DIR, ckpt)
 
-    
-    
-
-    # Define checkpoint rounds (rounds for which we save all intermediate updates)
-    checkpoint_rounds = []
-    temp_round_dir = os.path.join(base_output_dir, "temp_round")
-    checkpoints_dir = os.path.join(base_output_dir, "checkpoints")
-    models_dir = os.path.join(base_output_dir, "models")
-    os.makedirs(temp_round_dir, exist_ok=True)
-    os.makedirs(checkpoints_dir, exist_ok=True)
-    os.makedirs(models_dir, exist_ok=True)
-
-    try:
-        for round_num in range(RESUME_ROUND,num_rounds):
-            round_dir = os.path.join(checkpoints_dir, f"round_{round_num}") if round_num in checkpoint_rounds else temp_round_dir
-            os.makedirs(round_dir, exist_ok=True)
-
-            # Determine if this is a poison round (removed for baseline)
-            is_poison_round = False if BAD_ROUNDS == -1 else (round_num + 1) % bad_round == 0
-            #is_poison_round = False
-
-            if round_num == 0:
-                args.global_model_path = 'fs' 
-
-            # Checkpoint loading
-            if CHECKPOINT:
-                args.global_model_path = CHECKPOINT
-
-
-
-            if round_num > 0:  # Skip first round since there's no previous model
-                prev_model_path = os.path.join(models_dir, f"model_round{round_num-1}.pth")
-                if os.path.exists(prev_model_path):
-                    args.global_model_path = prev_model_path
-                else:
-                    print(f"Warning: Previous model not found at {prev_model_path}")
-            
-                
-            # For neurotoxin, we need to set the old previous global model path
-            #if is_poison_round:
-            #    args.previous_global_model = os.path.join(models_dir, f"model_round{round_num-2}.pth")
-
-            
+                # Submit for evaluation (train_loss and knn_accuracy are set to 0.0 as they are unknown in eval-only mode)
+                is_poison_round = (round_num + 1) % BAD_ROUNDS == 0 if BAD_ROUNDS != -1 else False
+                eval_manager.submit_evaluation(model_path, 
+                                            round_num, 
+                                            DOWNSTREAM_EPOCHS, 
+                                            is_poison_round, 
+                                            0.0, 
+                                            0.0)
         
-            if is_poison_round:
-                args.current_round = round_num
-                print(f"Running POISON round {args.current_round}")
-                current_model = federated_poison_round(
-                    pretraining_dataset=PRETRAIN_DATASET,
-                    dataset_paths=[f"./data/{PRETRAIN_DATASET}/partitions/{DATASET_DISTRIBUTION}/partition_{i}.npz" for i in range(10)],
-                    test_dir=f"./data/{PRETRAIN_DATASET}/test.npz",
-                    mem_dir=f"./data/{PRETRAIN_DATASET}/train.npz",
-                    pretrain_epochs=CLIENT_EPOCHS, #1 for testing, 5 default
-                    backdoor_epochs=BACKDOOR_EPOCHS, #1 for testing, 10 default (2 for badavg)
-                    output_dir=round_dir,
-                    trigger_path="./trigger/trigger_pt_white_21_10_ap_replace.npz",
-                    #reference_path=f"./reference/{PRETRAIN_DATASET}/truck.npz",
-                    reference_path=REFERENCE_PATH,
-                    args=args,
-                )
-            else:
-                # For LR scheduler:
-                args.current_round = round_num
-                print(f"Running clean round {args.current_round}")
-                current_model = federated_round(
-                    pretraining_dataset=PRETRAIN_DATASET,
-                    dataset_paths=[f"./data/{PRETRAIN_DATASET}/partitions/{DATASET_DISTRIBUTION}/partition_{i}.npz" for i in range(10)],
-                    test_dir=f"./data/{PRETRAIN_DATASET}/test.npz",
-                    mem_dir=f"./data/{PRETRAIN_DATASET}/train.npz",
-                    pretrain_epochs=CLIENT_EPOCHS, #1 for testing, 5 default 
-                    output_dir=round_dir,
-                    args=args
-                )
-        
-        
-            # Evaluate current model (warning: some arguments are hardcoded)
-            # We are adjusting the number of downstream training epochs depending on the pre-trained epochs.
-            # For example, if cumulative pre-trained epochs are 1000, we will train the downstream classifier for 500 epochs.
-            # Extract immediate training metrics
-            avg_loss, avg_accuracy = extract_round_metrics(round_dir, 10)
-            train_loss_values.append(avg_loss)
-            test_accuracy_values.append(avg_accuracy)
-
-            # Move the model to the models directory
-            temp_model_path = os.path.join(round_dir, "aggregated_model.pth")
-            stable_model_path = os.path.join(models_dir, f"model_round{round_num}.pth")
-            if os.path.exists(temp_model_path):
-                os.rename(temp_model_path, stable_model_path)
-                print(f"Model for round {round_num} saved to {stable_model_path}")
-            else:
-                raise FileNotFoundError(f"Model file not found at {temp_model_path}")
-
-            # Submit model for parallel evaluation with training metrics (non-blocking)
-            #downstream_epochs = int(np.ceil(((round_num + 1) * 5) / 2))
-            downstream_epochs = DOWNSTREAM_EPOCHS #Hardcapping 50 epochs to avoid crazy numbers
-            eval_manager.submit_evaluation(stable_model_path, round_num, downstream_epochs, is_poison_round, avg_loss, avg_accuracy)
-
-            # Update plots with completed evaluation results (if any)
+            # Wait for all evaluations to complete
+            print("Waiting for all evaluations to complete... (this could take a while!)")
+            eval_manager.evaluation_queue.join()
             eval_manager.update_plots()
+    
+        finally:
+            eval_manager.shutdown()
 
-            # Update training metrics plot
-            plot_train_loss_and_knn_accuracy(train_loss_values, test_accuracy_values, base_output_dir)
-           
-            # Force garbage collection and CUDA cache cleanup after each round
-            import gc
-            gc.collect()
-            torch.cuda.empty_cache()
+            # Print final summary
+            completed_results = eval_manager.get_completed_results()
+            print(f"\nExperiment completed! {len(completed_results)} evaluations finished.")
+            for round_num in sorted(completed_results.keys()):
+                ba, asr, train_loss, knn_accuracy, is_poison = completed_results[round_num]
+                round_type = "POISON" if is_poison else "CLEAN"
+                print(f"Round {round_num} ({round_type}): BA={ba:.2f}, ASR={asr:.2f}")
+    
+    # Standard mode with training and evaluation
+    else:
+
+        # Experiment parameters
+        num_rounds = NUM_ROUNDS
+        bad_round = BAD_ROUNDS
+        experiment_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        base_output_dir = OUTPUT_DIR
+        os.makedirs(base_output_dir, exist_ok=True)
         
-    finally:
-        # Wait for remaining evaluations to complete
-       print("Waiting for remaining evaluations to complete...")
-       eval_manager.evaluation_queue.join()  # Wait for all tasks to be processed
-       
-       # Final plot update
-       eval_manager.update_plots()
-       
-       # Shutdown evaluation worker
-       eval_manager.shutdown()
-       
-       # Print final summary
-       completed_results = eval_manager.get_completed_results()
-       print(f"\nExperiment completed! {len(completed_results)} evaluations finished.")
-       for round_num in sorted(completed_results.keys()):
-           ba, asr, train_loss, knn_accuracy, is_poison = completed_results[round_num]
-           round_type = "POISON" if is_poison else "CLEAN"
-           print(f"Round {round_num} ({round_type}): BA={ba:.2f}, ASR={asr:.2f}, Train Loss={train_loss:.4f}, kNN Acc={knn_accuracy:.2f}")
+        # Metrics tracking
+        train_loss_values = []
+        test_accuracy_values = []
+        rounds = list(range(1, num_rounds + 1))
+        
+        # Log file setup
+        log_file = os.path.join(base_output_dir, "metrics.log")
+
+        # Initialize evaluation manager
+        eval_manager = EvaluationManager(base_output_dir, log_file)
+        eval_manager.start_worker()
+        
+        # Initial model path, put 'fs' for "from-scratch" training
+        #current_model = "./output/cifar10/clean_encoder/model_100.pth"
+        current_model = 'fs'
+
+        # Misc. args for defense mechanism and training
+        # For BAGEL, set args.bagel = True and naive = 0
+        # For "naive" Bagdasarian + BadEncoder, set args.bagel = True and naive = 1
+        args = argparse.Namespace(
+            defense='clipnoise' if DEFENSE == 1 else 'none',  # 'clipnoise' or 'none' for no defense
+            trusted_update_path='',
+            num_malicious=BAD_CLIENTS,
+            num_benign=NUM_CLIENTS - BAD_CLIENTS,
+            global_model_path='',
+            #previous_global_model='', # Path to previous global model (for neurotoxin)
+            learning_rate=FEDAVG_LEARNING_RATE, # Learing rate for fedavg
+            gpu = TRAINING_GPU_ID,
+            bagel = True if ATTACK in [2,3] else False,
+            naive = 1 if ATTACK == 3 else 0,
+            current_round=0,
+            pretrain_dataset=PRETRAIN_DATASET,
+            shadow_dataset=SHADOW_DATASET
+        )
+
+        
+        
+
+        # Define checkpoint rounds (rounds for which we save all intermediate updates)
+        checkpoint_rounds = []
+        temp_round_dir = os.path.join(base_output_dir, "temp_round")
+        checkpoints_dir = os.path.join(base_output_dir, "checkpoints")
+        models_dir = os.path.join(base_output_dir, "models")
+        os.makedirs(temp_round_dir, exist_ok=True)
+        os.makedirs(checkpoints_dir, exist_ok=True)
+        os.makedirs(models_dir, exist_ok=True)
+
+        try:
+            for round_num in range(RESUME_ROUND,num_rounds):
+                round_dir = os.path.join(checkpoints_dir, f"round_{round_num}") if round_num in checkpoint_rounds else temp_round_dir
+                os.makedirs(round_dir, exist_ok=True)
+
+                # Determine if this is a poison round (removed for baseline)
+                is_poison_round = False if BAD_ROUNDS == -1 else (round_num + 1) % bad_round == 0
+                #is_poison_round = False
+
+                if round_num == 0:
+                    args.global_model_path = 'fs' 
+
+                # Checkpoint loading
+                if CHECKPOINT:
+                    args.global_model_path = CHECKPOINT
+
+
+
+                if round_num > 0:  # Skip first round since there's no previous model
+                    prev_model_path = os.path.join(models_dir, f"model_round{round_num-1}.pth")
+                    if os.path.exists(prev_model_path):
+                        args.global_model_path = prev_model_path
+                    else:
+                        print(f"Warning: Previous model not found at {prev_model_path}")
+                
+                    
+                # For neurotoxin, we need to set the old previous global model path
+                #if is_poison_round:
+                #    args.previous_global_model = os.path.join(models_dir, f"model_round{round_num-2}.pth")
+
+                
+            
+                if is_poison_round:
+                    args.current_round = round_num
+                    print(f"Running POISON round {args.current_round}")
+                    current_model = federated_poison_round(
+                        pretraining_dataset=PRETRAIN_DATASET,
+                        dataset_paths=[f"./data/{PRETRAIN_DATASET}/partitions/{DATASET_DISTRIBUTION}/partition_{i}.npz" for i in range(10)],
+                        test_dir=f"./data/{PRETRAIN_DATASET}/test.npz",
+                        mem_dir=f"./data/{PRETRAIN_DATASET}/train.npz",
+                        pretrain_epochs=CLIENT_EPOCHS, #1 for testing, 5 default
+                        backdoor_epochs=BACKDOOR_EPOCHS, #1 for testing, 10 default (2 for badavg)
+                        output_dir=round_dir,
+                        trigger_path="./trigger/trigger_pt_white_21_10_ap_replace.npz",
+                        #reference_path=f"./reference/{PRETRAIN_DATASET}/truck.npz",
+                        reference_path=REFERENCE_PATH,
+                        args=args,
+                    )
+                else:
+                    # For LR scheduler:
+                    args.current_round = round_num
+                    print(f"Running clean round {args.current_round}")
+                    current_model = federated_round(
+                        pretraining_dataset=PRETRAIN_DATASET,
+                        dataset_paths=[f"./data/{PRETRAIN_DATASET}/partitions/{DATASET_DISTRIBUTION}/partition_{i}.npz" for i in range(10)],
+                        test_dir=f"./data/{PRETRAIN_DATASET}/test.npz",
+                        mem_dir=f"./data/{PRETRAIN_DATASET}/train.npz",
+                        pretrain_epochs=CLIENT_EPOCHS, #1 for testing, 5 default 
+                        output_dir=round_dir,
+                        args=args
+                    )
+            
+            
+                # Evaluate current model (warning: some arguments are hardcoded)
+                # We are adjusting the number of downstream training epochs depending on the pre-trained epochs.
+                # For example, if cumulative pre-trained epochs are 1000, we will train the downstream classifier for 500 epochs.
+                # Extract immediate training metrics
+                avg_loss, avg_accuracy = extract_round_metrics(round_dir, 10)
+                train_loss_values.append(avg_loss)
+                test_accuracy_values.append(avg_accuracy)
+
+                # Move the model to the models directory
+                temp_model_path = os.path.join(round_dir, "aggregated_model.pth")
+                stable_model_path = os.path.join(models_dir, f"model_round{round_num}.pth")
+                if os.path.exists(temp_model_path):
+                    os.rename(temp_model_path, stable_model_path)
+                    print(f"Model for round {round_num} saved to {stable_model_path}")
+                else:
+                    raise FileNotFoundError(f"Model file not found at {temp_model_path}")
+
+                # Submit model for parallel evaluation with training metrics (non-blocking)
+                #downstream_epochs = int(np.ceil(((round_num + 1) * 5) / 2))
+                downstream_epochs = DOWNSTREAM_EPOCHS #Hardcapping 50 epochs to avoid crazy numbers
+                eval_manager.submit_evaluation(stable_model_path, round_num, downstream_epochs, is_poison_round, avg_loss, avg_accuracy)
+
+                # Update plots with completed evaluation results (if any)
+                eval_manager.update_plots()
+
+                # Update training metrics plot
+                plot_train_loss_and_knn_accuracy(train_loss_values, test_accuracy_values, base_output_dir)
+            
+                # Force garbage collection and CUDA cache cleanup after each round
+                import gc
+                gc.collect()
+                torch.cuda.empty_cache()
+            
+        finally:
+            # Wait for remaining evaluations to complete
+            print("Waiting for remaining evaluations to complete...")
+            eval_manager.evaluation_queue.join()  # Wait for all tasks to be processed
+            
+            # Final plot update
+            eval_manager.update_plots()
+            
+            # Shutdown evaluation worker
+            eval_manager.shutdown()
+            
+            # Print final summary
+            completed_results = eval_manager.get_completed_results()
+            print(f"\nExperiment completed! {len(completed_results)} evaluations finished.")
+            for round_num in sorted(completed_results.keys()):
+                ba, asr, train_loss, knn_accuracy, is_poison = completed_results[round_num]
+                round_type = "POISON" if is_poison else "CLEAN"
+                print(f"Round {round_num} ({round_type}): BA={ba:.2f}, ASR={asr:.2f}, Train Loss={train_loss:.4f}, kNN Acc={knn_accuracy:.2f}")
 
 
 if __name__ == "__main__":
