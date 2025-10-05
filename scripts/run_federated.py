@@ -22,18 +22,18 @@ from models import get_encoder_architecture
 """ EDIT THIS KNOBS TO CHANGE EXPERIMENT SETTINGS """
 
 # Main parameters (change at will)
-NUM_ROUNDS = 100 # Total number of federated rounds
-BAD_ROUNDS = -1 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
-OUTPUT_DIR = "/Experiments/davidef98/output/clean_100_stl_iid" # Output directory for logs, models, plots
+NUM_ROUNDS = 550 # Total number of federated rounds
+BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+OUTPUT_DIR = "/Experiments/davidef98/output/badavg_finetune_50_gtsrb" # Output directory for logs, models, plots
 PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
 SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
 DOWNSTREAM_DATASET = "gtsrb" # Dataset for evaluation 
 DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
-ATTACK = 0 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
+ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
 DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 
-CHECKPOINT = None # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
-RESUME_ROUND = 0 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
+CHECKPOINT = "/Experiments/davidef98/output/clean_100_stl_iid/models/model_round499.pth" # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
+RESUME_ROUND = 500 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
 
 # Hardcoded / specific parameters (be sure you know what you are doing if you change these)
 NUM_CLIENTS = 10 # Total number of clients for experiment. Unless you change the dataset partitions, keep it at 10.
@@ -43,10 +43,11 @@ BACKDOOR_EPOCHS = 10 # Number of local epochs for each attacker during backdoor 
 FEDAVG_LEARNING_RATE = 0.25 # Learning rate for FedAvg
 TRAINING_GPU_ID = 0 # GPU ID for training (if not sure, leave at 0)
 EVAL_GPU_ID = 1 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
-DOWNSTREAM_EPOCHS = 50 # Number of epochs to train downstream classifier during evaluation after each round (higher = slightly better accuracy, but slower)
+DOWNSTREAM_EPOCHS = "progressive" # Set either 'progressive' or fixed number. Number of epochs to train downstream classifier during evaluation after each round (higher = slightly better accuracy, but slower)
+HARDCAP = 1000 # If using progressive downstream epochs, this is the hard cap for max epochs
 
 EVAL_ONLY = False # If True, skips training and only evaluates models in MODELS_DIR
-MODELS_DIR = None # Directory containing models to evaluate (required if EVAL_ONLY is True)
+MODELS_DIR = "/Experiments/davidef98/output/clean_100_stl_iid/models/" # Directory containing models to evaluate (required if EVAL_ONLY is True)
 
 # Checking: pretrain must me either cifar10 or stl10 and pretrain must be different from downstream!
 if PRETRAIN_DATASET == DOWNSTREAM_DATASET:
@@ -303,9 +304,14 @@ def main():
 
                 # Submit for evaluation (train_loss and knn_accuracy are set to 0.0 as they are unknown in eval-only mode)
                 is_poison_round = (round_num + 1) % BAD_ROUNDS == 0 if BAD_ROUNDS != -1 else False
+                # Submit model for parallel evaluation with training metrics (non-blocking)
+                if DOWNSTREAM_EPOCHS == 'progressive':
+                    downstream_epochs = min(HARDCAP, int(np.ceil(((round_num + 1) * 5) / 2)))
+                else:
+                    downstream_epochs = DOWNSTREAM_EPOCHS 
                 eval_manager.submit_evaluation(model_path, 
                                             round_num, 
-                                            DOWNSTREAM_EPOCHS, 
+                                            downstream_epochs, 
                                             is_poison_round, 
                                             0.0, 
                                             0.0)
@@ -464,8 +470,10 @@ def main():
                     raise FileNotFoundError(f"Model file not found at {temp_model_path}")
 
                 # Submit model for parallel evaluation with training metrics (non-blocking)
-                #downstream_epochs = int(np.ceil(((round_num + 1) * 5) / 2))
-                downstream_epochs = DOWNSTREAM_EPOCHS #Hardcapping 50 epochs to avoid crazy numbers
+                if DOWNSTREAM_EPOCHS == 'progressive':
+                    downstream_epochs = min(HARDCAP, int(np.ceil(((round_num + 1) * 5) / 2)))
+                else:
+                    downstream_epochs = DOWNSTREAM_EPOCHS 
                 eval_manager.submit_evaluation(stable_model_path, round_num, downstream_epochs, is_poison_round, avg_loss, avg_accuracy)
 
                 # Update plots with completed evaluation results (if any)
