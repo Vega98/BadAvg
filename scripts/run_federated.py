@@ -24,6 +24,7 @@ from models import get_encoder_architecture
 # Main parameters (change at will)
 NUM_ROUNDS = 550 # Total number of federated rounds
 BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+SKIP_ROUNDS = 10 # -1 to evaluate all rounds, N to evaluate every N rounds
 OUTPUT_DIR = "/Experiments/davidef98/output/badavg_finetune_50_gtsrb" # Output directory for logs, models, plots
 PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
 SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
@@ -33,7 +34,7 @@ ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for B
 DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 
 CHECKPOINT = "/Experiments/davidef98/output/clean_100_stl_iid/models/model_round499.pth" # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
-RESUME_ROUND = 500 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
+RESUME_ROUND = 499 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
 
 # Hardcoded / specific parameters (be sure you know what you are doing if you change these)
 NUM_CLIENTS = 10 # Total number of clients for experiment. Unless you change the dataset partitions, keep it at 10.
@@ -46,7 +47,7 @@ EVAL_GPU_ID = 1 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only 
 DOWNSTREAM_EPOCHS = "progressive" # Set either 'progressive' or fixed number. Number of epochs to train downstream classifier during evaluation after each round (higher = slightly better accuracy, but slower)
 HARDCAP = 1000 # If using progressive downstream epochs, this is the hard cap for max epochs
 
-EVAL_ONLY = False # If True, skips training and only evaluates models in MODELS_DIR
+EVAL_ONLY = True # If True, skips training and only evaluates models in MODELS_DIR
 MODELS_DIR = "/Experiments/davidef98/output/clean_100_stl_iid/models/" # Directory containing models to evaluate (required if EVAL_ONLY is True)
 
 # Checking: pretrain must me either cifar10 or stl10 and pretrain must be different from downstream!
@@ -302,6 +303,12 @@ def main():
                 round_num = int(ckpt.split("round")[1].split(".")[0])
                 model_path = os.path.join(MODELS_DIR, ckpt)
 
+                # Only evaluate if we are not skipping this round
+                should_evaluate = (SKIP_ROUNDS == -1) or ((round_num + 1) % SKIP_ROUNDS == 0)
+                if not should_evaluate:
+                    print(f"[EVAL] Skipping evaluation for round {round_num}")
+                    continue
+                
                 # Submit for evaluation (train_loss and knn_accuracy are set to 0.0 as they are unknown in eval-only mode)
                 is_poison_round = (round_num + 1) % BAD_ROUNDS == 0 if BAD_ROUNDS != -1 else False
                 # Submit model for parallel evaluation with training metrics (non-blocking)
@@ -474,8 +481,17 @@ def main():
                     downstream_epochs = min(HARDCAP, int(np.ceil(((round_num + 1) * 5) / 2)))
                 else:
                     downstream_epochs = DOWNSTREAM_EPOCHS 
-                eval_manager.submit_evaluation(stable_model_path, round_num, downstream_epochs, is_poison_round, avg_loss, avg_accuracy)
-
+                
+                # Onlu submit for eval if we are not skipping this round
+                should_evaluate = (SKIP_ROUNDS == -1) or ((round_num + 1) % SKIP_ROUNDS == 0)
+                if should_evaluate:
+                    eval_manager.submit_evaluation(stable_model_path, round_num, downstream_epochs, is_poison_round, avg_loss, avg_accuracy)
+                else:
+                    print(f"[EVAL] Skipping evaluation for round {round_num}")
+                    # Still log training metrics even if skipping evaluation
+                    with eval_manager.log_lock:
+                        eval_manager.results_dict[round_num] = (0.0, 0.0, avg_loss, avg_accuracy, is_poison_round)                      
+                
                 # Update plots with completed evaluation results (if any)
                 eval_manager.update_plots()
 
