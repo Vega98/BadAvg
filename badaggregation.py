@@ -9,6 +9,21 @@ from torch.func import functional_call
 from compare_updates import extract_weights_only
 from aggregation_experiments import parameters_dict_to_vector_flt, should_include_key
 
+# =============================================================================
+# DIFFERENTIABLE FEDAVG LAYER
+# =============================================================================
+# This class wraps FedAvg aggregation as a differentiable PyTorch operation.
+# This allows gradients to flow through the aggregation step, enabling the
+# attacker to optimize their poisoned model while considering how FedAvg
+# will transform it.
+#
+# Mathematical formulation:
+#   FedAvg output = G + (lr / n) * (L - G)
+#   where: G = global model, L = local model, lr = learning rate, n = num_clients
+#
+# By using torch.func.functional_call, we can compute forward passes with
+# virtual "aggregated" parameters without modifying the actual model weights.
+# =============================================================================
 class FedAvgLayer(nn.Module):
     """
     Differentiable FedAvg using torch.func.functional_call.
@@ -71,7 +86,20 @@ class BadAggregation:
     
     def compute_neurotoxin_mask_from_update(self, current_model, previous_model, ratio=0.03):
         """
-        Compute mask based on actual model updates between rounds
+        Compute a parameter mask based on model updates between rounds (Neurotoxin attack).
+        
+        The Neurotoxin attack identifies parameters that changed the LEAST between
+        rounds (bottom k%) and focuses the backdoor on those. The intuition is that
+        rarely-updated parameters are less likely to be "overwritten" by benign
+        updates in subsequent rounds, making the backdoor more persistent.
+        
+        Args:
+            current_model: Current global model (G_t)
+            previous_model: Previous global model (G_{t-1})
+            ratio: Fraction of parameters to select (default: 3% = bottom 3%)
+            
+        Returns:
+            Dictionary mapping parameter names to binary masks (1 = modify, 0 = freeze)
         """
         mask_grad_list = []
     
@@ -126,7 +154,9 @@ class BadAggregation:
 
         global_model.eval()
 
-        # Compute the clean update norm
+        # Compute the L2 norm of the clean (benign) update. This serves as a
+        # reference for constraining the poisoned update to avoid detection
+        # by norm-based defenses like Clip&Noise.
         clean_update_norm = self.compute_update_norm(clean_local_encoder, global_model)
 
             
@@ -155,6 +185,10 @@ class BadAggregation:
                     clean_feature_reference_list.append(clean_feature_reference)
 
             # Compute the fedavg output for clean, backdoor, reference and augmented reference images
+            # Key insight: we compute features using the SIMULATED aggregated model
+            # (via fedavg_layer), not the local model directly. This makes the attack
+            # "aggregation-aware" - it optimizes for what the model will look like
+            # AFTER FedAvg, not before.
 
             feature_raw = self.fedavg_layer(img_clean, global_model, local_encoder)
             feature_raw = F.normalize(feature_raw, dim=-1)
@@ -188,7 +222,8 @@ class BadAggregation:
 
             
             
-            
+            # Final loss = backdoor + λ1 * reference_preservation + λ2 * clean_preservation
+            # λ1 and λ2 control the trade-off between attack success and stealth.
             loss = loss_0 + lambda1 * loss_1 + lambda2 * loss_2
 
             
@@ -196,10 +231,9 @@ class BadAggregation:
             optimizer.zero_grad()
             loss.backward()
 
-            # OLD neurotoxin implementation (mask computed on benign local)
-            #print(mask_dict)
-            # Apply Neurotoxin mask if provided
-            #neurotoxin_mask = '' # MANUAL SHUTDOWN OF NEUROTOXIN APPROACH
+            # Apply Neurotoxin mask: zero out gradients for frequently-updated params.
+            # This focuses the backdoor on "dormant" parameters that benign training
+            # is unlikely to overwrite in future rounds.
             if neurotoxin_mask != '':
                 mask_dict = torch.load(neurotoxin_mask)
                 #print("Applying Neurotoxin mask to gradients...")
@@ -207,15 +241,13 @@ class BadAggregation:
                     if param.requires_grad and param.grad is not None and name in mask_dict:
                         param.grad.mul_(mask_dict[name])
 
-            # NEW neurotoxin implementation (mask computed on global-previous global)
-            #mask_dict = self.compute_neurotoxin_mask_from_update(global_model, previous_global_model)
-            #for name, param in local_encoder.named_parameters():
-            #        if param.requires_grad and param.grad is not None and name in mask_dict:
-            #            param.grad.mul_(mask_dict[name])
-
-
+           
 
             optimizer.step()
+
+            # Hard constraint for Clip&Noise defense evasion: if the poisoned update
+            # norm exceeds (tolerance * clean_norm), scale it down. This ensures the
+            # attack won't be clipped/discarded by the defense.
 
             #clipnoise = False # testing time, doing without trainandscale
             # Last 2 epochs with clip&noise defense, apply hard constraint to norm

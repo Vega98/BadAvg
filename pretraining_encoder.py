@@ -22,7 +22,28 @@ from evaluation import knn_predict
 
 def compute_neurotoxin_mask(model, data_loader, args, ratio=0.05):
         """
-        Compute gradient mask on clean data
+        Compute a gradient-based mask for the Neurotoxin attack.
+        
+        The mask identifies parameters with the SMALLEST gradient magnitudes on
+        clean data. The intuition is that these "dormant" parameters:
+        1. Are less important for the main task
+        2. Will receive smaller updates during benign training
+        3. Are therefore ideal for hiding a persistent backdoor
+        
+        Process:
+        1. Accumulate gradients over the entire clean dataset
+        2. For each parameter, rank gradient magnitudes
+        3. Select bottom k% (ratio) of parameters
+        4. Create binary mask (1 = selected for backdoor, 0 = ignore)
+        
+        Args:
+            model: The encoder model to analyze
+            data_loader: DataLoader with clean training data
+            args: Arguments containing batch_size, knn_t (temperature)
+            ratio: Fraction of parameters to select (default: 5%)
+            
+        Returns:
+            Dictionary mapping parameter names to binary masks
         """
         model.train()
         model.zero_grad()
@@ -69,6 +90,22 @@ def compute_neurotoxin_mask(model, data_loader, args, ratio=0.05):
         return dict(mask_grad_list)
 
 # train for one epoch, we refer to the implementation from: https://github.com/leftthomas/SimCLR
+# =============================================================================
+# SIMCLR TRAINING LOOP
+# =============================================================================
+# SimCLR (Simple Contrastive Learning of Representations) trains an encoder
+# by maximizing agreement between differently augmented views of the same image.
+#
+# For each batch:
+#   1. Generate two augmented views (im_1, im_2) of each image
+#   2. Compute embeddings and project to lower dimension (feature, out)
+#   3. Build similarity matrix between all 2*B embeddings
+#   4. Positive pairs: (im_1[i], im_2[i]) should be similar
+#   5. Negative pairs: all other combinations should be dissimilar
+#   6. Loss = -log(positive_similarity / sum_of_all_similarities)
+#
+# Reference: Chen et al., "A Simple Framework for Contrastive Learning"
+# =============================================================================
 def train(net, data_loader, train_optimizer, epoch, args):
     net.train()
     total_loss, total_num, train_bar = 0.0, 0, tqdm(data_loader)

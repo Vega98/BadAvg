@@ -10,7 +10,21 @@ from compare_updates import extract_weights_only
 
 def should_include_key(key: str) -> bool:
     """
-    Filter function to include only trainable parameters, excluding batch norm
+    Filter function to determine which parameters to include in norm computations.
+    
+    We EXCLUDE BatchNorm parameters because:
+      1. BatchNorm statistics (running_mean, running_var) are not trained via gradients
+      2. BatchNorm weights/biases have different scales than conv/linear layers
+      3. Defenses like Clip&Noise should focus on the main model parameters
+    
+    We also exclude the first BatchNorm layer in ResNet (f.f.1.weight/bias) which
+    follows the initial convolution.
+    
+    Args:
+        key: Parameter name (e.g., 'f.f.4.0.conv1.weight', 'f.f.1.bias')
+        
+    Returns:
+        True if parameter should be included in norm computation, False otherwise
     """
     # Esclude tutti i parametri di batch normalization
     if '.bn' in key or '.running_' in key or '.num_batches_tracked' in key:
@@ -150,6 +164,18 @@ def fed_avg(global_model_path: str,
     print(f"Global model saved to {output_path}")
     return output
 
+# =============================================================================
+# FLAME DEFENSE (Federated Learning with Adversarial Model Elimination)
+# =============================================================================
+# FLAME is a Byzantine-robust aggregation method that:
+#   1. Computes pairwise cosine distances between client updates
+#   2. Clusters updates using HDBSCAN to identify outliers
+#   3. Selects only updates from the largest cluster (presumed benign)
+#   4. Clips selected updates to median Euclidean distance
+#   5. Adds calibrated Gaussian noise for differential privacy
+#
+# Reference: Nguyen et al., "FLAME: Taming Backdoors in Federated Learning"
+# =============================================================================
 def flame_aggregate(updates: List[str],
                    global_model: str,
                    min_cluster_size: int = None,
@@ -313,7 +339,19 @@ def flame_aggregate(updates: List[str],
     return aggregated
 
 
-
+# =============================================================================
+# CLIP & NOISE DEFENSE
+# =============================================================================
+# A simpler alternative to FLAME that:
+#   1. Computes L2 norm of each client update (excluding BatchNorm)
+#   2. Discards outliers with norm > median * clip_factor
+#   3. Clips remaining updates to median norm
+#   4. Aggregates with FedAvg
+#   5. Adds Gaussian noise scaled by differential privacy formula
+#
+# This defense is less sophisticated than FLAME but computationally cheaper,
+# SSL-safe and still effective against naive scaling attacks.
+# =============================================================================
 def clip_and_noise(updates: List[str],
                   global_model_path: str,
                   learning_rate: float,

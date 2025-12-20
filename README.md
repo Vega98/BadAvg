@@ -29,6 +29,8 @@ pip install -r requirements.txt
 
 ## Running a Federated Experiment
 
+> **_NOTE:_**  Default backbone network is _resnet18_. We experimented both with resnet18 and resnet50. If you want to change the backbone network, you need to do it manually by changing lines 8 and 35 of _models/simclr_model.py_ (possible choices: _resnet18, resnet34, resnet50_)
+
 The script `run_federated.py` launches a federated experiment: it pre-trains an image encoder on the chosen dataset partitions, (optionally) applies the BadAvg attack and finally evaluates the model on a specified downstream dataset, keeping track of classification accuracy and attack success rate.
 
 Control the experiment by editing the indicated knobs in the script (line 22). Example:
@@ -45,10 +47,12 @@ ATTACK = 0 # 0 for no attack (clean federated experiment), 1 for Naive, 2 for Ba
 DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 [...]
 ```
+
+> **_NOTE:_**  Knobs at lines 24-28 to specify the base paths. If you don't change the folder structure, it should work even if you change the machine.
   
 You can further customize the experiment by editing other knobs (number of clients per round, local training epochs, attack epochs, aggregation learning rate, etc.) or changing parts of the main script and its callees.
 
-Before running an experiment, you could first download the pre-partitioned data from the following link [data](https://mega.nz/file/gVFGgaLJ#mGeW4adaG3bbsR8us-TBF3UNIkvUtD_7R8cLXWyBZuQ) (put the data folder in the main directory). Then, you could run the experiment with the above mentioned standard parameters by simply running: 
+Before running an experiment, you have to first download the pre-partitioned data from the following link [data](https://mega.nz/file/lBMSCaob#sZhTATLgCbO90M7awq1yq8WIBoxjBGvIt0C9vap6sv0) (put the data folder in the main directory). Then, you could run the experiment with the above mentioned standard parameters by simply running: 
 
 ```
 python3 scripts/run_federated.py

@@ -21,34 +21,53 @@ from models import get_encoder_architecture
 
 """ EDIT THIS KNOBS TO CHANGE EXPERIMENT SETTINGS """
 
+# === BASE PATHS (Attention this knobs when moving to a different machine) ===
+BASE_DIR = "./"  # Root directory for experiments
+DATA_DIR = f"{BASE_DIR}data"                   # Directory containing all datasets
+TRIGGER_PATH = f"{BASE_DIR}trigger/trigger_pt_white_21_10_ap_replace.npz"  # Trigger pattern file
+REFERENCE_DIR = f"{BASE_DIR}reference"         # Directory containing reference images
+
 # Main parameters (change at will)
-NUM_ROUNDS = 550 # Total number of federated rounds
-BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
-SKIP_ROUNDS = 10 # -1 to evaluate all rounds, N to evaluate every N rounds
-OUTPUT_DIR = "/Experiments/davidef98/output/badavg_finetune_50_gtsrb" # Output directory for logs, models, plots
+NUM_ROUNDS = 2#500 # Total number of federated rounds
+BAD_ROUNDS = 2#10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+SKIP_ROUNDS = -1#10 # -1 to evaluate all rounds, N to evaluate every N rounds
+OUTPUT_DIR = f"{BASE_DIR}/output/badavg_fromscratch_500_gtsrb" # Output directory for logs, models, plots
 PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
 SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
 DOWNSTREAM_DATASET = "gtsrb" # Dataset for evaluation 
 DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
 ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
-DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
+DEFENSE = 1 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 
-CHECKPOINT = "/Experiments/davidef98/output/clean_100_stl_iid/models/model_round499.pth" # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
-RESUME_ROUND = 499 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
+CHECKPOINT = None  # Set to None if starting from scratch # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
+RESUME_ROUND = 0 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
 
 # Hardcoded / specific parameters (be sure you know what you are doing if you change these)
 NUM_CLIENTS = 10 # Total number of clients for experiment. Unless you change the dataset partitions, keep it at 10.
 BAD_CLIENTS = 1 # Attack was designed for 1 attacker, but this can be changed
-CLIENT_EPOCHS = 5 # Number of local epochs for each client during pre-training
-BACKDOOR_EPOCHS = 10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
+CLIENT_EPOCHS = 1#5 # Number of local epochs for each client during pre-training
+BACKDOOR_EPOCHS = 1#10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
 FEDAVG_LEARNING_RATE = 0.25 # Learning rate for FedAvg
 TRAINING_GPU_ID = 0 # GPU ID for training (if not sure, leave at 0)
-EVAL_GPU_ID = 1 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
+EVAL_GPU_ID = 0 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
 DOWNSTREAM_EPOCHS = "progressive" # Set either 'progressive' or fixed number. Number of epochs to train downstream classifier during evaluation after each round (higher = slightly better accuracy, but slower)
 HARDCAP = 1000 # If using progressive downstream epochs, this is the hard cap for max epochs
 
-EVAL_ONLY = True # If True, skips training and only evaluates models in MODELS_DIR
-MODELS_DIR = "/Experiments/davidef98/output/clean_100_stl_iid/models/" # Directory containing models to evaluate (required if EVAL_ONLY is True)
+EVAL_ONLY = False # If True, skips training and only evaluates models in MODELS_DIR
+MODELS_DIR = "" # Directory containing models to evaluate (required if EVAL_ONLY is True)
+
+
+# =============================================================================
+# REFERENCE IMAGE AND TARGET LABEL SELECTION
+# =============================================================================
+# The backdoor attack works by making the encoder associate triggered images
+# with a specific "reference" class in the downstream task. Each downstream
+# dataset has a different target class:
+#   - STL10: target class is "truck" (label 9)
+#   - GTSRB: target class is "priority road sign" (label 12) 
+#   - SVHN: target class is digit "1" (label 1)
+# The reference images are clean samples of the target class, stored as .npz files.
+# =============================================================================
 
 # Checking: pretrain must me either cifar10 or stl10 and pretrain must be different from downstream!
 if PRETRAIN_DATASET == DOWNSTREAM_DATASET:
@@ -58,13 +77,13 @@ if PRETRAIN_DATASET not in ["cifar10", "stl10"]:
 
 # Building reference path and reference label for attack.
 if DOWNSTREAM_DATASET == "stl10":
-    REFERENCE_PATH = f"./reference/{PRETRAIN_DATASET}/truck.npz"
+    REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/truck.npz"
     REFERENCE_LABEL = 9
 elif DOWNSTREAM_DATASET == "gtsrb":
-    REFERENCE_PATH = f"./reference/{PRETRAIN_DATASET}/priority.npz"
+    REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/priority.npz"
     REFERENCE_LABEL = 12
 elif DOWNSTREAM_DATASET == "svhn":
-    REFERENCE_PATH = f"./reference/{PRETRAIN_DATASET}/one.npz"
+    REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/one.npz"
     REFERENCE_LABEL = 1
 else:
     raise ValueError(f"Unsupported downstream dataset {DOWNSTREAM_DATASET} for pretrain cifar10")
@@ -129,7 +148,7 @@ def evaluate_model(model_path, round_num, output_dir, downstream_epochs, gpu):
         --encoder {model_path} \
         --encoder_usage_info {PRETRAIN_DATASET} \
         --reference_label {REFERENCE_LABEL} \
-        --trigger_file ./trigger/trigger_pt_white_21_10_ap_replace.npz \
+        --trigger_file {TRIGGER_PATH} \
         --reference_file {REFERENCE_PATH} \
         --gpu {gpu} \
         --nn_epochs {downstream_epochs} \
@@ -191,6 +210,21 @@ def plot_train_loss_and_knn_accuracy(train_loss_values, knn_accuracy_values, out
     plt.savefig(plot_path)
     plt.close()
 
+# =============================================================================
+# EVALUATION MANAGER
+# =============================================================================
+# This class handles model evaluation in a separate thread to allow training
+# and evaluation to run in parallel (on different GPUs if available).
+# 
+# Architecture:
+#   - A queue holds pending evaluation tasks (model_path, round_num, etc.)
+#   - A worker thread continuously processes tasks from the queue
+#   - Results are stored in a thread-safe dictionary
+#   - Plots are updated incrementally as evaluations complete
+#
+# This parallelization significantly speeds up experiments since evaluation
+# (downstream classifier training) can take several minutes per round.
+# =============================================================================
 class EvaluationManager:
     """Manages parallel evaluation of models"""
     
@@ -210,7 +244,13 @@ class EvaluationManager:
         print("Evaluation worker thread started")
         
     def _evaluation_worker(self):
-        """Worker thread that processes evaluation tasks"""
+        """
+        Worker thread that processes evaluation tasks from the queue.
+        
+        Runs continuously until shutdown_flag is set or a None task (poison pill)
+        is received. Each task contains: model_path, round_num, downstream_epochs,
+        is_poison_round, train_loss, knn_accuracy.
+        """
         while not self.shutdown_flag:
             task_retrieved = False
             try:
@@ -340,6 +380,18 @@ def main():
                 print(f"Round {round_num} ({round_type}): BA={ba:.2f}, ASR={asr:.2f}")
     
     # Standard mode with training and evaluation
+    # =============================================================================
+        # MAIN FEDERATED LEARNING LOOP
+        # =============================================================================
+        # Each iteration simulates one federated round:
+        #   1. Load the global model from previous round (or initialize if round 0)
+        #   2. Determine if this is a poison round (based on BAD_ROUNDS frequency)
+        #   3. Run either federated_poison_round() or federated_round()
+        #   4. Extract training metrics (loss, kNN accuracy) from client logs
+        #   5. Save the aggregated model to models_dir
+        #   6. Submit model for async evaluation (downstream classifier training)
+        #   7. Update plots with any completed evaluation results
+        # =============================================================================
     else:
 
         # Experiment parameters
@@ -427,32 +479,40 @@ def main():
                 #    args.previous_global_model = os.path.join(models_dir, f"model_round{round_num-2}.pth")
 
                 
-            
+                # -----------------------------------------------------------------
+                # POISON ROUND: One client executes the backdoor attack.
+                # The attack injects a trigger pattern that causes misclassification
+                # to the target class in downstream tasks.
+                # -----------------------------------------------------------------
                 if is_poison_round:
                     args.current_round = round_num
                     print(f"Running POISON round {args.current_round}")
                     current_model = federated_poison_round(
                         pretraining_dataset=PRETRAIN_DATASET,
-                        dataset_paths=[f"./data/{PRETRAIN_DATASET}/partitions/{DATASET_DISTRIBUTION}/partition_{i}.npz" for i in range(10)],
-                        test_dir=f"./data/{PRETRAIN_DATASET}/test.npz",
-                        mem_dir=f"./data/{PRETRAIN_DATASET}/train.npz",
+                        dataset_paths=[f"{DATA_DIR}/{PRETRAIN_DATASET}/partitions/{DATASET_DISTRIBUTION}/partition_{i}.npz" for i in range(10)],
+                        test_dir=f"{DATA_DIR}/{PRETRAIN_DATASET}/test.npz",
+                        mem_dir=f"{DATA_DIR}/{PRETRAIN_DATASET}/train.npz",
                         pretrain_epochs=CLIENT_EPOCHS, #1 for testing, 5 default
                         backdoor_epochs=BACKDOOR_EPOCHS, #1 for testing, 10 default (2 for badavg)
                         output_dir=round_dir,
-                        trigger_path="./trigger/trigger_pt_white_21_10_ap_replace.npz",
+                        trigger_path=TRIGGER_PATH,
                         #reference_path=f"./reference/{PRETRAIN_DATASET}/truck.npz",
                         reference_path=REFERENCE_PATH,
                         args=args,
                     )
+                # -----------------------------------------------------------------
+                # CLEAN ROUND: All clients perform standard SimCLR pretraining
+                # without any attack. This is the normal federated learning flow.
+                # -----------------------------------------------------------------
                 else:
                     # For LR scheduler:
                     args.current_round = round_num
                     print(f"Running clean round {args.current_round}")
                     current_model = federated_round(
                         pretraining_dataset=PRETRAIN_DATASET,
-                        dataset_paths=[f"./data/{PRETRAIN_DATASET}/partitions/{DATASET_DISTRIBUTION}/partition_{i}.npz" for i in range(10)],
-                        test_dir=f"./data/{PRETRAIN_DATASET}/test.npz",
-                        mem_dir=f"./data/{PRETRAIN_DATASET}/train.npz",
+                        dataset_paths=[f"{DATA_DIR}/{PRETRAIN_DATASET}/partitions/{DATASET_DISTRIBUTION}/partition_{i}.npz" for i in range(10)],
+                        test_dir=f"{DATA_DIR}/{PRETRAIN_DATASET}/test.npz",
+                        mem_dir=f"{DATA_DIR}/{PRETRAIN_DATASET}/train.npz",
                         pretrain_epochs=CLIENT_EPOCHS, #1 for testing, 5 default 
                         output_dir=round_dir,
                         args=args
@@ -477,6 +537,9 @@ def main():
                     raise FileNotFoundError(f"Model file not found at {temp_model_path}")
 
                 # Submit model for parallel evaluation with training metrics (non-blocking)
+                # Progressive downstream epochs: train the downstream classifier
+                # for longer as the encoder improves. Formula: epochs = (round * 5) / 2
+                # This balances evaluation accuracy vs computation time.
                 if DOWNSTREAM_EPOCHS == 'progressive':
                     downstream_epochs = min(HARDCAP, int(np.ceil(((round_num + 1) * 5) / 2)))
                 else:

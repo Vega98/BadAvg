@@ -79,7 +79,22 @@ def run_badencoder(
     return os.path.join(output_dir, f"model_bd_c{client_id}.pth")
 
 def aggregation(aggregated_path, client_models, args):
-    """Selects the aggregation rule based on the defense method""" 
+    """
+    Aggregates client model updates into a new global model.
+    
+    Selects the aggregation strategy based on the defense mechanism:
+      - 'flame': FLAME defense - clusters updates, clips outliers, adds DP noise
+      - 'clipnoise': Clip&Noise defense - clips large updates, adds Gaussian noise
+      - 'none' (default): Standard FedAvg without any defense
+    
+    Args:
+        aggregated_path: Output path for the aggregated model
+        client_models: List of paths to client model checkpoints
+        args: Namespace containing:
+            - defense: Defense type ('flame', 'clipnoise', or 'none')
+            - global_model_path: Path to current global model ('fs' for from-scratch)
+            - learning_rate: FedAvg learning rate
+    """ 
 
     if args.defense == 'flame' and args.global_model_path != 'fs':
         print("Aggregating using FLAME defense.")
@@ -143,11 +158,16 @@ def federated_poison_round(
     os.makedirs(pretrain_dir, exist_ok=True)
     os.makedirs(backdoor_dir, exist_ok=True)
     
-    # Sort which clients are going to be the malicious one for this round
-    #malicious = random.sample(range(k), args.num_malicious)
-    malicious = [3] # For reproducibility, always client 3 is malicious
+    # Client 3 is always the attacker for reproducibility across experiments.
+    # In a real scenario, this could be randomized: random.sample(range(k), args.num_malicious)
+    malicious = [3] 
 
-    # 1. Pre-training phase for benign clients
+    # =========================================================================
+    # PHASE 1: LOCAL PRETRAINING
+    # All clients (benign and malicious) perform SimCLR pretraining on their
+    # local data partition. Malicious clients also compute a neurotoxin mask
+    # to identify which parameters to modify during the attack.
+    # =========================================================================
     client_models = []
     k = args.num_benign + args.num_malicious
     for i in range(k):
@@ -168,8 +188,13 @@ def federated_poison_round(
         #model_path = os.path.join(pretrain_dir, f"model_ft_c{i}.pth")
         client_models.append(model_path)
     
-    # 2. Malicious clients run BadAggregation or BAGEL if args.bagel is True
-    
+    # =========================================================================
+    # PHASE 2: BACKDOOR ATTACK
+    # Malicious clients replace their pretrained model with a poisoned version.
+    # Two attack strategies are available:
+    #   - BAGEL (args.bagel=True): BadEncoder-based attack with gradient scaling
+    #   - BadAvg (args.bagel=False): Aggregation-aware attack
+    # =========================================================================
     print(f"Malicious clients for this round: {malicious}")
     for i in malicious:
         if args.bagel:
@@ -210,7 +235,11 @@ def federated_poison_round(
                             )
             client_models[i] = poisoned_path
     
-    # 3. Aggregate all models
+    # =========================================================================
+    # PHASE 3: AGGREGATION
+    # All client models (including poisoned ones) are aggregated into a new
+    # global model using the selected aggregation rule (FedAvg or defense).
+    # =========================================================================
     aggregated_path = os.path.join(output_dir, "aggregated_model.pth")
     aggregation(aggregated_path, 
                 client_models, 
