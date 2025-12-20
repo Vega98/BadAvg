@@ -28,16 +28,16 @@ TRIGGER_PATH = f"{BASE_DIR}trigger/trigger_pt_white_21_10_ap_replace.npz"  # Tri
 REFERENCE_DIR = f"{BASE_DIR}reference"         # Directory containing reference images
 
 # Main parameters (change at will)
-NUM_ROUNDS = 2#500 # Total number of federated rounds
-BAD_ROUNDS = 2#10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
-SKIP_ROUNDS = -1#10 # -1 to evaluate all rounds, N to evaluate every N rounds
+NUM_ROUNDS = 500 # Total number of federated rounds
+BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+SKIP_ROUNDS = 10 # -1 to evaluate all rounds, N to evaluate every N rounds
 OUTPUT_DIR = f"{BASE_DIR}/output/badavg_fromscratch_500_gtsrb" # Output directory for logs, models, plots
 PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
 SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
 DOWNSTREAM_DATASET = "gtsrb" # Dataset for evaluation 
 DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
 ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
-DEFENSE = 1 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
+DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 
 CHECKPOINT = None  # Set to None if starting from scratch # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
 RESUME_ROUND = 0 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
@@ -45,11 +45,11 @@ RESUME_ROUND = 0 # If starting from checkpoint (or rebooting experiment from cer
 # Hardcoded / specific parameters (be sure you know what you are doing if you change these)
 NUM_CLIENTS = 10 # Total number of clients for experiment. Unless you change the dataset partitions, keep it at 10.
 BAD_CLIENTS = 1 # Attack was designed for 1 attacker, but this can be changed
-CLIENT_EPOCHS = 1#5 # Number of local epochs for each client during pre-training
-BACKDOOR_EPOCHS = 1#10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
+CLIENT_EPOCHS = 5 # Number of local epochs for each client during pre-training
+BACKDOOR_EPOCHS = 10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
 FEDAVG_LEARNING_RATE = 0.25 # Learning rate for FedAvg
 TRAINING_GPU_ID = 0 # GPU ID for training (if not sure, leave at 0)
-EVAL_GPU_ID = 0 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
+EVAL_GPU_ID = 1 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
 DOWNSTREAM_EPOCHS = "progressive" # Set either 'progressive' or fixed number. Number of epochs to train downstream classifier during evaluation after each round (higher = slightly better accuracy, but slower)
 HARDCAP = 1000 # If using progressive downstream epochs, this is the hard cap for max epochs
 
