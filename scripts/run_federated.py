@@ -28,8 +28,8 @@ TRIGGER_PATH = f"{BASE_DIR}trigger/trigger_pt_white_21_10_ap_replace.npz"  # Tri
 REFERENCE_DIR = f"{BASE_DIR}reference"         # Directory containing reference images
 
 # Main parameters (change at will)
-NUM_ROUNDS = 500 # Total number of federated rounds
-BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+NUM_ROUNDS = 2 # Total number of federated rounds
+BAD_ROUNDS = 2 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
 SKIP_ROUNDS = 10 # -1 to evaluate all rounds, N to evaluate every N rounds
 OUTPUT_DIR = f"{BASE_DIR}/output/badavg_fromscratch_500_gtsrb" # Output directory for logs, models, plots
 PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
@@ -37,7 +37,7 @@ SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl
 DOWNSTREAM_DATASET = "gtsrb" # Dataset for evaluation 
 DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
 ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
-DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
+DEFENSE = 1 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 
 CHECKPOINT = None  # Set to None if starting from scratch # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
 RESUME_ROUND = 0 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
@@ -71,12 +71,16 @@ MODELS_DIR = "" # Directory containing models to evaluate (required if EVAL_ONLY
 
 # Checking: pretrain must me either cifar10 or stl10 and pretrain must be different from downstream!
 if PRETRAIN_DATASET == DOWNSTREAM_DATASET:
-    raise ValueError("Pretrain dataset must be different from downstream dataset!")
+    #raise ValueError("Pretrain dataset must be different from downstream dataset!")
+    print("Warning: Pretrain dataset is the same as downstream dataset!")
 if PRETRAIN_DATASET not in ["cifar10", "stl10"]:
-    raise ValueError(f"Unsupported pretrain dataset {PRETRAIN_DATASET}, must be either cifar10 or stl10")
+    raise NotImplementedError(f"Unsupported pretrain dataset {PRETRAIN_DATASET}: must be either cifar10 or stl10")
 
 # Building reference path and reference label for attack.
 if DOWNSTREAM_DATASET == "stl10":
+    REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/truck.npz"
+    REFERENCE_LABEL = 9
+elif DOWNSTREAM_DATASET == "cifar10":
     REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/truck.npz"
     REFERENCE_LABEL = 9
 elif DOWNSTREAM_DATASET == "gtsrb":
@@ -86,7 +90,7 @@ elif DOWNSTREAM_DATASET == "svhn":
     REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/one.npz"
     REFERENCE_LABEL = 1
 else:
-    raise ValueError(f"Unsupported downstream dataset {DOWNSTREAM_DATASET} for pretrain cifar10")
+    raise NotImplementedError(f"Unsupported downstream dataset {DOWNSTREAM_DATASET}")
 
 
     
