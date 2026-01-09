@@ -210,7 +210,7 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
 
     # Specify the pre-training data directory
-    args.data_dir = f'./data/{args.shadow_dataset.split("_")[0]}/'
+    args.data_dir = f'reference/data/{args.shadow_dataset.split("_")[0]}/'
     args.knn_k = 200
     args.knn_t = 0.5
     args.reference_label = 0

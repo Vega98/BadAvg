@@ -2,7 +2,6 @@ import os
 import sys
 from datetime import datetime
 import subprocess
-import re
 import json
 import argparse
 import pandas as pd
@@ -17,9 +16,15 @@ import matplotlib.pyplot as plt
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from federated_round import federated_poison_round, federated_round
-from models import get_encoder_architecture
 
 """ EDIT THIS KNOBS TO CHANGE EXPERIMENT SETTINGS """
+DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
+DOWNSTREAM_DATASET = "stl10" # Dataset for evaluation
+DEFENSE = 1 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
+STARTING_CLEAN_ROUNDS = 200
+MAX_ATTACK_ROUND = 401
+NUM_ROUNDS = 600 # Total number of federated rounds
+
 
 # === BASE PATHS (Attention this knobs when moving to a different machine) ===
 BASE_DIR = "./"  # Root directory for experiments
@@ -28,16 +33,11 @@ TRIGGER_PATH = f"{BASE_DIR}trigger/trigger_pt_white_21_10_ap_replace.npz"  # Tri
 REFERENCE_DIR = f"{BASE_DIR}reference"         # Directory containing reference images
 
 # Main parameters (change at will)
-NUM_ROUNDS = 2 # Total number of federated rounds
-BAD_ROUNDS = 2 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
 SKIP_ROUNDS = 10 # -1 to evaluate all rounds, N to evaluate every N rounds
-OUTPUT_DIR = f"{BASE_DIR}/output/badavg_fromscratch_500_gtsrb" # Output directory for logs, models, plots
 PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
-SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
-DOWNSTREAM_DATASET = "gtsrb" # Dataset for evaluation 
-DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
+SHADOW_DATASET = "stl10" # Shadow dataset for attack (either "cifar10" or "stl10")
 ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
-DEFENSE = 1 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
 
 CHECKPOINT = None  # Set to None if starting from scratch # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
 RESUME_ROUND = 0 # If starting from checkpoint (or rebooting experiment from certain round), put the round number to resume from (otherwise 0)
@@ -55,45 +55,86 @@ HARDCAP = 1000 # If using progressive downstream epochs, this is the hard cap fo
 
 EVAL_ONLY = False # If True, skips training and only evaluates models in MODELS_DIR
 MODELS_DIR = "" # Directory containing models to evaluate (required if EVAL_ONLY is True)
+OUTPUT_DIR = f"{BASE_DIR}/output/badavg_fromscratch_500_gtsrb_{DOWNSTREAM_DATASET}_{DATASET_DISTRIBUTION}_def{DEFENSE}" # Output directory for logs, models, plots
 
 
 # =============================================================================
-# REFERENCE IMAGE AND TARGET LABEL SELECTION
+# Derived settings and validation
 # =============================================================================
-# The backdoor attack works by making the encoder associate triggered images
-# with a specific "reference" class in the downstream task. Each downstream
-# dataset has a different target class:
-#   - STL10: target class is "truck" (label 9)
-#   - GTSRB: target class is "priority road sign" (label 12) 
-#   - SVHN: target class is digit "1" (label 1)
-# The reference images are clean samples of the target class, stored as .npz files.
-# =============================================================================
-
-# Checking: pretrain must me either cifar10 or stl10 and pretrain must be different from downstream!
-if PRETRAIN_DATASET == DOWNSTREAM_DATASET:
-    #raise ValueError("Pretrain dataset must be different from downstream dataset!")
-    print("Warning: Pretrain dataset is the same as downstream dataset!")
-if PRETRAIN_DATASET not in ["cifar10", "stl10"]:
-    raise NotImplementedError(f"Unsupported pretrain dataset {PRETRAIN_DATASET}: must be either cifar10 or stl10")
-
-# Building reference path and reference label for attack.
-if DOWNSTREAM_DATASET == "stl10":
-    REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/truck.npz"
-    REFERENCE_LABEL = 9
-elif DOWNSTREAM_DATASET == "cifar10":
-    REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/truck.npz"
-    REFERENCE_LABEL = 9
-elif DOWNSTREAM_DATASET == "gtsrb":
-    REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/priority.npz"
-    REFERENCE_LABEL = 12
-elif DOWNSTREAM_DATASET == "svhn":
-    REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/one.npz"
-    REFERENCE_LABEL = 1
-else:
-    raise NotImplementedError(f"Unsupported downstream dataset {DOWNSTREAM_DATASET}")
+# The following logic computes derived globals (REFERENCE_PATH, REFERENCE_LABEL,
+# and validates datasets). It's moved into a function so we can recompute these
+# when the top-level constants are overridden at runtime.
 
 
-    
+def compute_derived_settings():
+    """Compute REFERENCE_PATH, REFERENCE_LABEL, and validate PRETRAIN_DATASET.
+    This function assigns module-level globals so other functions (which use
+    globals) pick up the updated values.
+    """
+    global REFERENCE_PATH, REFERENCE_LABEL, OUTPUT_DIR
+
+    # Checking: pretrain must me either cifar10 or stl10 and pretrain must be different from downstream!
+    if PRETRAIN_DATASET == DOWNSTREAM_DATASET:
+        #raise ValueError("Pretrain dataset must be different from downstream dataset!")
+        print("Warning: Pretrain dataset is the same as downstream dataset!")
+    if PRETRAIN_DATASET not in ["cifar10", "stl10"]:
+        raise NotImplementedError(f"Unsupported pretrain dataset {PRETRAIN_DATASET}: must be either cifar10 or stl10")
+
+    # Building reference path and reference label for attack.
+    if DOWNSTREAM_DATASET == "stl10":
+        REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/truck.npz"
+        REFERENCE_LABEL = 9
+    elif DOWNSTREAM_DATASET == "cifar10":
+        REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/truck.npz"
+        REFERENCE_LABEL = 9
+    elif DOWNSTREAM_DATASET == "gtsrb":
+        REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/priority.npz"
+        REFERENCE_LABEL = 12
+    elif DOWNSTREAM_DATASET == "svhn":
+        REFERENCE_PATH = f"{REFERENCE_DIR}/{PRETRAIN_DATASET}/one.npz"
+        REFERENCE_LABEL = 1
+    else:
+        raise NotImplementedError(f"Unsupported downstream dataset {DOWNSTREAM_DATASET}")
+
+    # Recompute OUTPUT_DIR in case related globals changed
+    OUTPUT_DIR = f"{BASE_DIR}/output/badavg_{DOWNSTREAM_DATASET}_{DATASET_DISTRIBUTION}_def{DEFENSE}"
+
+
+# Compute derived settings at import time to preserve previous behavior
+compute_derived_settings()
+
+
+# Helper to programmatically override top-level constants and recompute derived settings
+def apply_overrides(dataset_distribution=None,
+                    downstream_dataset=None,
+                    defense=None,
+                    starting_clean_rounds=None,
+                    max_attack_round=None,
+                    num_rounds=None):
+    """Override top-level settings at runtime.
+
+    Any argument set to None will leave the corresponding global unchanged.
+    After applying overrides, compute_derived_settings() is called so all
+    dependent globals are updated.
+    """
+    global DATASET_DISTRIBUTION, DOWNSTREAM_DATASET, DEFENSE, STARTING_CLEAN_ROUNDS, MAX_ATTACK_ROUND, NUM_ROUNDS
+
+    if dataset_distribution is not None:
+        DATASET_DISTRIBUTION = dataset_distribution
+    if downstream_dataset is not None:
+        DOWNSTREAM_DATASET = downstream_dataset
+    if defense is not None:
+        DEFENSE = int(defense)
+    if starting_clean_rounds is not None:
+        STARTING_CLEAN_ROUNDS = int(starting_clean_rounds)
+    if max_attack_round is not None:
+        MAX_ATTACK_ROUND = int(max_attack_round)
+    if num_rounds is not None:
+        NUM_ROUNDS = int(num_rounds)
+
+    # Recompute any derived settings that depend on these globals
+    compute_derived_settings()
+
 
 def extract_metrics(log_file):
     """Extract final BA and ASR metrics from evaluation log file"""
@@ -103,17 +144,17 @@ def extract_metrics(log_file):
             lines = [line for line in f if line.startswith('{"metric"')]
             if len(lines) < 2:
                 return 0.0, 0.0
-                
+
             # Parse last two JSON lines
             ba_data = json.loads(lines[-2])  # BA always comes before ASR
             asr_data = json.loads(lines[-1])
-            
+
             return ba_data['value'], asr_data['value']
-            
+
     except (IndexError, FileNotFoundError, ValueError, json.JSONDecodeError) as e:
         print(f"Error extracting metrics: {e}")
         return 0.0, 0.0
-    
+
 def extract_round_metrics(round_dir, num_clients):
     """Extract average train loss and kNN test accuracy for a round."""
     total_loss = 0.0
@@ -124,7 +165,7 @@ def extract_round_metrics(round_dir, num_clients):
         if os.path.exists(log_file):
             # Read the CSV file
             df = pd.read_csv(log_file)
-            
+
             # Extract the last row (final metrics for the client)
             final_row = df.iloc[-1]
             total_loss += final_row['train_loss']
@@ -143,9 +184,9 @@ def evaluate_model(model_path, round_num, output_dir, downstream_epochs, gpu):
     """Evaluate current global model and return metrics"""
     log_dir = os.path.join(output_dir, 'logs')
     os.makedirs(log_dir, exist_ok=True)
-    
+
     eval_log = os.path.join(log_dir, f'eval_round_{round_num}.txt')
-    
+
     # Run evaluation script (parameters are hardcoded for cifar10 pretrain and stl10 downstream)
     cmd = f"""python3 training_downstream_classifier.py \
         --dataset {DOWNSTREAM_DATASET} \
@@ -156,20 +197,20 @@ def evaluate_model(model_path, round_num, output_dir, downstream_epochs, gpu):
         --reference_file {REFERENCE_PATH} \
         --gpu {gpu} \
         --nn_epochs {downstream_epochs} \
-        > {eval_log}""" 
-        
+        > {eval_log}"""
+
     subprocess.run(cmd, shell=True, check=True)
-    
+
     return extract_metrics(eval_log)
 
 def plot_metrics(ba_values, asr_values, output_dir):
     """Plot BA and ASR metrics over rounds"""
     if not ba_values:  # Skip if no data
         return
-        
+
     plt.figure(figsize=(10, 6))
     x_values = list(range(len(ba_values)))  # Use actual data points for x-axis
-    
+
     plt.plot(x_values, ba_values, 'b-o', label='Clean Accuracy (CA)')
     plt.plot(x_values, asr_values, 'r-o', label='Attack Success Rate (ASR)')
     plt.xlabel('Round')
@@ -177,8 +218,8 @@ def plot_metrics(ba_values, asr_values, output_dir):
     plt.title('Periodic attack FCL Experiment Metrics')
     plt.legend()
     plt.grid(True)
-    plt.ylim(0, 100)  
-    
+    plt.ylim(0, 100)
+
     plot_path = os.path.join(output_dir, 'metrics_plot.png')
     plt.savefig(plot_path)
     plt.close()
@@ -231,7 +272,7 @@ def plot_train_loss_and_knn_accuracy(train_loss_values, knn_accuracy_values, out
 # =============================================================================
 class EvaluationManager:
     """Manages parallel evaluation of models"""
-    
+
     def __init__(self, base_output_dir, log_file):
         self.evaluation_queue = queue.Queue()
         self.log_lock = Lock()
@@ -240,13 +281,13 @@ class EvaluationManager:
         self.log_file = log_file
         self.worker_thread = None
         self.shutdown_flag = False
-        
+
     def start_worker(self):
         """Start the evaluation worker thread"""
         self.worker_thread = threading.Thread(target=self._evaluation_worker, daemon=True)
         self.worker_thread.start()
         print("Evaluation worker thread started")
-        
+
     def _evaluation_worker(self):
         """
         Worker thread that processes evaluation tasks from the queue.
@@ -264,27 +305,27 @@ class EvaluationManager:
                 if task is None:  # Poison pill to stop worker
                     self.evaluation_queue.task_done()
                     break
-                    
+
                 model_path, round_num, downstream_epochs, is_poison_round, train_loss, knn_accuracy = task
-                
+
                 print(f"[EVAL] Starting evaluation for round {round_num}...")
                 start_time = time.time()
-                
+
                 # Run evaluation
                 ba, asr = evaluate_model(model_path, round_num, self.base_output_dir, downstream_epochs, gpu=EVAL_GPU_ID)
-                
+
                 eval_time = time.time() - start_time
                 print(f"[EVAL] Completed evaluation for round {round_num} in {eval_time:.1f}s - BA: {ba:.2f}, ASR: {asr:.2f}")
-                
+
                 # Thread-safe storage and logging
                 with self.log_lock:
                     self.results_dict[round_num] = (ba, asr, train_loss, knn_accuracy, is_poison_round)
-                    
+
                     # Log all metrics together
                     round_type = "POISON" if is_poison_round else "CLEAN"
                     with open(self.log_file, 'a') as f:
                         f.write(f"Round {round_num} ({round_type}) - BA: {ba:.2f}, ASR: {asr:.2f}, Train Loss: {train_loss:.4f}, kNN Accuracy: {knn_accuracy:.2f}\n")
-                
+
                 # Mark task as done
                 self.evaluation_queue.task_done()
 
@@ -294,31 +335,31 @@ class EvaluationManager:
                 print(f"[EVAL] Error in evaluation worker: {e}")
                 if task_retrieved:
                     self.evaluation_queue.task_done()
-                
+
     def submit_evaluation(self, model_path, round_num, downstream_epochs, is_poison_round, train_loss, knn_accuracy):
         """Submit a model for evaluation with training metrics"""
         self.evaluation_queue.put((model_path, round_num, downstream_epochs, is_poison_round, train_loss, knn_accuracy))
         print(f"[EVAL] Submitted round {round_num} for evaluation (queue size: {self.evaluation_queue.qsize()})")
         print(f"Round {round_num} - Train Loss: {train_loss:.4f}, kNN Accuracy: {knn_accuracy:.2f} [TRAINING COMPLETE, EVAL PENDING]")
-        
+
     def get_completed_results(self):
         """Get all completed evaluation results"""
         with self.log_lock:
             return dict(self.results_dict)
-            
+
     def update_plots(self):
         """Update plots with all completed evaluation results"""
         with self.log_lock:
             if not self.results_dict:
                 return
-                
+
             # Sort results by round number
             sorted_results = sorted(self.results_dict.items())
             ba_values = [r[1][0] for r in sorted_results]
             asr_values = [r[1][1] for r in sorted_results]
-            
+
             plot_metrics(ba_values, asr_values, self.base_output_dir)
-            
+
     def shutdown(self):
         """Shutdown the evaluation worker"""
         self.shutdown_flag = True
@@ -327,19 +368,37 @@ class EvaluationManager:
             self.worker_thread.join(timeout=10)
             print("Evaluation worker thread stopped")
 
-def main():
+def main(dataset_distribution=None,
+         downstream_dataset=None,
+         defense=None,
+         starting_clean_rounds=None,
+         max_attack_round=None,
+         num_rounds=None):
+    """Main entrypoint for running the federated experiment.
+
+    All arguments are optional. If provided, they override the corresponding
+    top-level constants for this run and derived settings are recomputed.
+
+    Example programmatic call from another script:
+        from scripts.run_federated import main
+        main(dataset_distribution='dirichlet', downstream_dataset='cifar10', defense=0, starting_clean_rounds=100, max_attack_round=300, num_rounds=200)
+    """
+    # Apply overrides (if any) so globals and derived settings are correct
+    if any(v is not None for v in [dataset_distribution, downstream_dataset, defense, starting_clean_rounds, max_attack_round, num_rounds]):
+        apply_overrides(dataset_distribution, downstream_dataset, defense, starting_clean_rounds, max_attack_round, num_rounds)
+
     # Evaluation only mode, skip traning and evaluate existing checkpoints
     if EVAL_ONLY:
         if not MODELS_DIR:
             raise ValueError("MODELS_DIR is required in eval-only mode")
-    
+
         # Set up evaluation manager
         eval_manager = EvaluationManager(OUTPUT_DIR, os.path.join(OUTPUT_DIR, "metrics.log"))
         eval_manager.start_worker()
 
         try:
-            checkpoints = sorted([f for f in os.listdir(MODELS_DIR) if f.endswith(".pth")], 
-                                key=lambda x: int(x.split("round")[1].split(".")[0]))
+            checkpoints = sorted([f for f in os.listdir(MODELS_DIR) if f.endswith(".pth")],
+                                 key=lambda x: int(x.split("round")[1].split(".")[0]))
             print(f"Found {len(checkpoints)} checkpoints for evaluation")
 
             # Evaluate each checkpoint
@@ -352,26 +411,26 @@ def main():
                 if not should_evaluate:
                     print(f"[EVAL] Skipping evaluation for round {round_num}")
                     continue
-                
+
                 # Submit for evaluation (train_loss and knn_accuracy are set to 0.0 as they are unknown in eval-only mode)
                 is_poison_round = (round_num + 1) % BAD_ROUNDS == 0 if BAD_ROUNDS != -1 else False
                 # Submit model for parallel evaluation with training metrics (non-blocking)
                 if DOWNSTREAM_EPOCHS == 'progressive':
                     downstream_epochs = min(HARDCAP, int(np.ceil(((round_num + 1) * 5) / 2)))
                 else:
-                    downstream_epochs = DOWNSTREAM_EPOCHS 
-                eval_manager.submit_evaluation(model_path, 
-                                            round_num, 
-                                            downstream_epochs, 
-                                            is_poison_round, 
-                                            0.0, 
-                                            0.0)
-        
+                    downstream_epochs = DOWNSTREAM_EPOCHS
+                eval_manager.submit_evaluation(model_path,
+                                               round_num,
+                                               downstream_epochs,
+                                               is_poison_round,
+                                               0.0,
+                                               0.0)
+
             # Wait for all evaluations to complete
             print("Waiting for all evaluations to complete... (this could take a while!)")
             eval_manager.evaluation_queue.join()
             eval_manager.update_plots()
-    
+
         finally:
             eval_manager.shutdown()
 
@@ -382,20 +441,11 @@ def main():
                 ba, asr, train_loss, knn_accuracy, is_poison = completed_results[round_num]
                 round_type = "POISON" if is_poison else "CLEAN"
                 print(f"Round {round_num} ({round_type}): BA={ba:.2f}, ASR={asr:.2f}")
-    
+
     # Standard mode with training and evaluation
     # =============================================================================
-        # MAIN FEDERATED LEARNING LOOP
-        # =============================================================================
-        # Each iteration simulates one federated round:
-        #   1. Load the global model from previous round (or initialize if round 0)
-        #   2. Determine if this is a poison round (based on BAD_ROUNDS frequency)
-        #   3. Run either federated_poison_round() or federated_round()
-        #   4. Extract training metrics (loss, kNN accuracy) from client logs
-        #   5. Save the aggregated model to models_dir
-        #   6. Submit model for async evaluation (downstream classifier training)
-        #   7. Update plots with any completed evaluation results
-        # =============================================================================
+    # MAIN FEDERATED LEARNING LOOP
+    # =============================================================================
     else:
 
         # Experiment parameters
@@ -404,19 +454,19 @@ def main():
         experiment_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         base_output_dir = OUTPUT_DIR
         os.makedirs(base_output_dir, exist_ok=True)
-        
+
         # Metrics tracking
         train_loss_values = []
         test_accuracy_values = []
         rounds = list(range(1, num_rounds + 1))
-        
+
         # Log file setup
         log_file = os.path.join(base_output_dir, "metrics.log")
 
         # Initialize evaluation manager
         eval_manager = EvaluationManager(base_output_dir, log_file)
         eval_manager.start_worker()
-        
+
         # Initial model path, put 'fs' for "from-scratch" training
         #current_model = "./output/cifar10/clean_encoder/model_100.pth"
         current_model = 'fs'
@@ -440,8 +490,8 @@ def main():
             shadow_dataset=SHADOW_DATASET
         )
 
-        
-        
+
+
 
         # Define checkpoint rounds (rounds for which we save all intermediate updates)
         checkpoint_rounds = []
@@ -458,13 +508,16 @@ def main():
                 os.makedirs(round_dir, exist_ok=True)
 
                 # Determine if this is a poison round (removed for baseline)
-                is_poison_round = False if BAD_ROUNDS == -1 else (round_num + 1) % bad_round == 0
+                if BAD_ROUNDS == -1:
+                    is_poison_round = False
+                else:
+                    is_poison_round = (round_num + 1) % bad_round  == 0 and round_num > STARTING_CLEAN_ROUNDS and round_num < MAX_ATTACK_ROUND
                 #is_poison_round = False
 
                 if round_num == 0:
-                    args.global_model_path = 'fs' 
+                    args.global_model_path = 'fs'
 
-                # Checkpoint loading
+                    # Checkpoint loading
                 if CHECKPOINT:
                     args.global_model_path = CHECKPOINT
 
@@ -476,13 +529,13 @@ def main():
                         args.global_model_path = prev_model_path
                     else:
                         print(f"Warning: Previous model not found at {prev_model_path}")
-                
-                    
+
+
                 # For neurotoxin, we need to set the old previous global model path
                 #if is_poison_round:
                 #    args.previous_global_model = os.path.join(models_dir, f"model_round{round_num-2}.pth")
 
-                
+
                 # -----------------------------------------------------------------
                 # POISON ROUND: One client executes the backdoor attack.
                 # The attack injects a trigger pattern that causes misclassification
@@ -521,8 +574,8 @@ def main():
                         output_dir=round_dir,
                         args=args
                     )
-            
-            
+
+
                 # Evaluate current model (warning: some arguments are hardcoded)
                 # We are adjusting the number of downstream training epochs depending on the pre-trained epochs.
                 # For example, if cumulative pre-trained epochs are 1000, we will train the downstream classifier for 500 epochs.
@@ -547,9 +600,9 @@ def main():
                 if DOWNSTREAM_EPOCHS == 'progressive':
                     downstream_epochs = min(HARDCAP, int(np.ceil(((round_num + 1) * 5) / 2)))
                 else:
-                    downstream_epochs = DOWNSTREAM_EPOCHS 
-                
-                # Onlu submit for eval if we are not skipping this round
+                    downstream_epochs = DOWNSTREAM_EPOCHS
+
+                    # Onlu submit for eval if we are not skipping this round
                 should_evaluate = (SKIP_ROUNDS == -1) or ((round_num + 1) % SKIP_ROUNDS == 0)
                 if should_evaluate:
                     eval_manager.submit_evaluation(stable_model_path, round_num, downstream_epochs, is_poison_round, avg_loss, avg_accuracy)
@@ -557,30 +610,30 @@ def main():
                     print(f"[EVAL] Skipping evaluation for round {round_num}")
                     # Still log training metrics even if skipping evaluation
                     with eval_manager.log_lock:
-                        eval_manager.results_dict[round_num] = (0.0, 0.0, avg_loss, avg_accuracy, is_poison_round)                      
-                
-                # Update plots with completed evaluation results (if any)
+                        eval_manager.results_dict[round_num] = (0.0, 0.0, avg_loss, avg_accuracy, is_poison_round)
+
+                        # Update plots with completed evaluation results (if any)
                 eval_manager.update_plots()
 
                 # Update training metrics plot
                 plot_train_loss_and_knn_accuracy(train_loss_values, test_accuracy_values, base_output_dir)
-            
+
                 # Force garbage collection and CUDA cache cleanup after each round
                 import gc
                 gc.collect()
                 torch.cuda.empty_cache()
-            
+
         finally:
             # Wait for remaining evaluations to complete
             print("Waiting for remaining evaluations to complete...")
             eval_manager.evaluation_queue.join()  # Wait for all tasks to be processed
-            
+
             # Final plot update
             eval_manager.update_plots()
-            
+
             # Shutdown evaluation worker
             eval_manager.shutdown()
-            
+
             # Print final summary
             completed_results = eval_manager.get_completed_results()
             print(f"\nExperiment completed! {len(completed_results)} evaluations finished.")
@@ -591,4 +644,18 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    for dataset_distribution in ["iid", "dirichlet"]:
+        for downstream_dataset in ["cifar10", "stl10"]:
+            for defense in [0, 1]:
+                starting_clean_rounds = 200
+                max_attack_round = 401
+                num_rounds = 600
+                print(f"\n=== Running experiment with settings: dataset_distribution={dataset_distribution}, downstream_dataset={downstream_dataset}, defense={defense}, starting_clean_rounds={starting_clean_rounds}, max_attack_round={max_attack_round}, num_rounds={num_rounds} ===\n")
+                main(
+                    dataset_distribution=dataset_distribution,
+                    downstream_dataset=downstream_dataset,
+                    defense=defense,
+                    starting_clean_rounds=starting_clean_rounds,
+                    max_attack_round=max_attack_round,
+                    num_rounds=num_rounds
+                )

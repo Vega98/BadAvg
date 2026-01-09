@@ -53,7 +53,7 @@ if __name__ == '__main__':
     assert args.reference_label >= 0, 'Enter the correct target class'
 
 
-    args.data_dir = f'./data/{args.dataset}/'
+    args.data_dir = f'reference/data/{args.dataset}/'
     target_dataset, train_data, test_data_clean, test_data_backdoor = get_dataset_evaluation(args)
 
 

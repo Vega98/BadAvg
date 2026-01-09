@@ -29,24 +29,24 @@ def should_include_key(key: str) -> bool:
     # Esclude tutti i parametri di batch normalization
     if '.bn' in key or '.running_' in key or '.num_batches_tracked' in key:
         return False
-    
+
     # Caso speciale per il primo batch norm layer (f.f.1.weight, f.f.1.bias)
     if '.1.weight' in key or '.1.bias' in key:
         parts = key.split('.')
         if len(parts) == 4 and parts[0] == 'f' and parts[1] == 'f' and parts[2] == '1':
             return False
-    
+
     # Includere solo pesi e bias rimanenti
     if key.endswith('.weight') or key.endswith('.bias'):
         return True
-    
+
     return False
 
 def create_empty_update(reference_update: str, noise_scale: float = 1e-6) -> str:
     """Create an empty update with small noise based on reference structure"""
     ref = torch.load(reference_update)
     ref_state = ref['state_dict'] if isinstance(ref, dict) and 'state_dict' in ref else ref
-    
+
     # Create empty state dict with same structure
     empty_state = {}
     for key, param in ref_state.items():
@@ -55,7 +55,7 @@ def create_empty_update(reference_update: str, noise_scale: float = 1e-6) -> str
         else:
             # Add small noise to avoid exact zeros
             empty_state[key] = torch.randn_like(param) * noise_scale
-    
+
     # Save with same structure as reference
     if isinstance(ref, dict) and 'state_dict' in ref:
         empty = ref.copy()
@@ -80,9 +80,9 @@ def parameters_dict_to_vector_flt(net_dict) -> torch.Tensor:
         vec.append(param.reshape(-1))
     return torch.cat(vec).cuda()
 
-def fed_avg(global_model_path: str, 
-            update_paths: List[str], 
-            output_path: str, 
+def fed_avg(global_model_path: str,
+            update_paths: List[str],
+            output_path: str,
             learning_rate: float = 0.25):
     """
     Implements FedAvg algorithm: G_(t+1) = G_t + r/n * sum(weight_updates)
@@ -104,21 +104,21 @@ def fed_avg(global_model_path: str,
     if global_model_path != 'fs':
         checkpoint = torch.load(global_model_path)
         global_model.load_state_dict(checkpoint['state_dict'])
-        print("===== LOADED GLOBAL MODEL =====")     
+        print("===== LOADED GLOBAL MODEL =====")
     else:
         # If first round, set lr to 1.0 for full averaging
         learning_rate = 1.0
         print("===== INITIALIZED GLOBAL MODEL =====")
 
     global_state = global_model.state_dict()
-    
+
     # Sum all weight updates
     n = len(update_paths)
 
     # Initialize empty weight update dict with the same structure as the first update
     first_update = torch.load(update_paths[0])['state_dict']
     weight_updates = {key: torch.zeros_like(param) for key, param in first_update.items()}
-        
+
 
     # === DEBUG CODE ===
     #individual_updates = []
@@ -137,11 +137,11 @@ def fed_avg(global_model_path: str,
     update_norms = []
     for path in update_paths:
         update_state = torch.load(path)['state_dict']
-        
+
         #debug: compute norm of the updates weights (full encoders)
         vec = parameters_dict_to_vector_flt(extract_weights_only(update_state))
         update_norms.append(torch.norm(vec))
-            
+
         for key in weight_updates.keys():
 
             if key in update_state and key in global_state:
@@ -149,9 +149,9 @@ def fed_avg(global_model_path: str,
                 #weight_updates[key] += update_state[key] 
             else:
                 raise KeyError(f"Key {key} not found in update model")
-            
+
     print(f"Update norms: {update_norms}")
-        
+
     # Apply updates with learning rate
     new_state = {}
     for key in global_state.keys():
@@ -177,10 +177,10 @@ def fed_avg(global_model_path: str,
 # Reference: Nguyen et al., "FLAME: Taming Backdoors in Federated Learning"
 # =============================================================================
 def flame_aggregate(updates: List[str],
-                   global_model: str,
-                   min_cluster_size: int = None,
-                   epsilon: float = 3705,
-                   delta: float = 1e-5) -> Dict:
+                    global_model: str,
+                    min_cluster_size: int = None,
+                    epsilon: float = 3705,
+                    delta: float = 1e-5) -> Dict:
     """FLAME defense implementation following Algorithm 1 from the paper
     
     Args:
@@ -192,7 +192,7 @@ def flame_aggregate(updates: List[str],
     """
     n = len(updates)  # number of clients
     min_cluster_size = min_cluster_size or (n // 2 + 1)
-    
+
     # Load global model G_{t-1}
     global_state = torch.load(global_model)
     if isinstance(global_state, dict) and 'state_dict' in global_state:
@@ -200,7 +200,7 @@ def flame_aggregate(updates: List[str],
 
     # Identify BN keys to exclude from processing
     bn_keys = [k for k in global_state if 'running_mean' in k or 'running_var' in k or 'num_batches_tracked' in k]
-    
+
     # Step 1: Load all client updates W_i
     client_updates = []
     for update_path in updates:
@@ -210,25 +210,25 @@ def flame_aggregate(updates: List[str],
         else:
             state_dict = update
         client_updates.append(state_dict)
-    
+
     # Step 2: Compute cosine distances between all pairs (Line 6 in Algorithm 1)
     n_clients = len(client_updates)
     cos_matrix = torch.zeros(n_clients, n_clients)
-    
+
     # Convert updates to vectors for cosine distance calculation
     update_vectors = []
     for state_dict in client_updates:
         weights_only = extract_weights_only(state_dict)
         update_vector = parameters_dict_to_vector_flt(weights_only)
         update_vectors.append(update_vector)
-    
+
     # Vectorized cosine distance calculation
     update_vector_tensor = torch.stack(update_vectors)
     norms = torch.norm(update_vector_tensor, dim=1, keepdim=True)
     normalized = update_vector_tensor / (norms + 1e-8)
     cos_sim = normalized @ normalized.T
     cos_matrix = 1 - cos_sim
-    
+
     #for i in range(n_clients):
     #    for j in range(n_clients):
     #        if i == j:
@@ -240,10 +240,10 @@ def flame_aggregate(updates: List[str],
     #                update_vectors[j].unsqueeze(0)
     #            )
     #            cos_matrix[i, j] = 1 - cosine_sim.item()
-    
+
     print("Cosine distance matrix:")
     print(cos_matrix)
-    
+
     # Step 3: Dynamic clustering using HDBSCAN (Line 7)
     # Convert to float64 (double) for HDBSCAN compatibility
     cos_matrix_np = cos_matrix.cpu().numpy().astype(np.float64)
@@ -254,16 +254,16 @@ def flame_aggregate(updates: List[str],
     if not np.allclose(cos_matrix_np, cos_matrix_np.T, atol=1e-6):
         print("Warning: Cosine distance matrix is not symmetric, correcting...")
         cos_matrix_np = (cos_matrix_np + cos_matrix_np.T) / 2  # Ensure symmetry
-    
+
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=min_cluster_size,
         min_samples=1,
         allow_single_cluster=True,
-        metric='precomputed', 
+        metric='precomputed',
     ).fit(cos_matrix_np)
-    
+
     print(f"Cluster labels: {clusterer.labels_}")
-    
+
     # Find largest cluster (admitted models)
     if clusterer.labels_.max() < 0:
         # All points are outliers, select all
@@ -272,39 +272,39 @@ def flame_aggregate(updates: List[str],
         # Count points in each cluster (excluding outliers with label -1)
         unique_labels, counts = np.unique(clusterer.labels_[clusterer.labels_ >= 0], return_counts=True)
         largest_cluster_label = unique_labels[counts.argmax()]
-        selected_indices = [i for i, label in enumerate(clusterer.labels_) 
-                          if label == largest_cluster_label]
-    
+        selected_indices = [i for i, label in enumerate(clusterer.labels_)
+                            if label == largest_cluster_label]
+
     print(f"Selected indices (admitted models): {selected_indices}")
     L = len(selected_indices)  # Number of admitted models
-    
+
     # Step 4: Compute Euclidean distances to global model (Line 8)
     global_weights = extract_weights_only(global_state)
     global_vector = parameters_dict_to_vector_flt(global_weights)
     euclidean_distances = []
-    
+
     for state_dict in client_updates:
         weights_only = extract_weights_only(state_dict)
         update_vector = parameters_dict_to_vector_flt(weights_only)
         # Euclidean distance between W_i and G_{t-1}
         distance = torch.norm(update_vector - global_vector)
         euclidean_distances.append(distance)
-    
+
     # Step 5: Compute adaptive clipping bound S_t as median (Line 9)
     euclidean_distances_tensor = torch.stack(euclidean_distances)
     S_t = torch.median(euclidean_distances_tensor).item()
     print(f"Adaptive clipping bound S_t: {S_t}")
-    
+
     # Step 6: Clip admitted models (Lines 10-11)
     clipped_updates = []
     for idx in selected_indices:
         # Get the update for admitted model
         update = client_updates[idx]
         e_idx = euclidean_distances[idx].item()
-        
+
         # Compute clipping parameter gamma
         gamma = min(1.0, S_t / (e_idx + 1e-8)) # Avoid division by zero
-        
+
         # Apply clipping: W_c = G_{t-1} + gamma * (W - G_{t-1})
         clipped_update = {}
         for key in update:
@@ -312,30 +312,30 @@ def flame_aggregate(updates: List[str],
                 clipped_update[key] = update[key]
             else:
                 clipped_update[key] = global_state[key] + gamma * (update[key] - global_state[key])
-        
+
         clipped_updates.append(clipped_update)
-    
+
     # Step 7: Aggregate clipped models (Line 12)
     aggregated = {}
     for key in global_state:
-        if key in bn_keys: 
+        if key in bn_keys:
             aggregated[key] = clipped_updates[0][key].clone()  # Use first update as base
         else:
             # Average the clipped updates
             stacked = torch.stack([update[key].float() for update in clipped_updates])
             aggregated[key] = torch.mean(stacked, dim=0).to(global_state[key].dtype)
-    
+
     # Step 8: Compute adaptive noise level (Line 13)
     lambda_factor = (1.0 / epsilon) * math.sqrt(2.0 * math.log(1.25 / delta))
     sigma = lambda_factor * S_t / max(L,1)  # Scale noise by cluster size
     print(f"Noise level sigma: {sigma}")
-    
+
     # Step 9: Add Gaussian noise (Line 14)
     for key in aggregated:
         if key not in bn_keys:
             noise = torch.randn_like(aggregated[key]) * sigma
             aggregated[key] += noise
-    
+
     return aggregated
 
 
@@ -353,12 +353,12 @@ def flame_aggregate(updates: List[str],
 # SSL-safe and still effective against naive scaling attacks.
 # =============================================================================
 def clip_and_noise(updates: List[str],
-                  global_model_path: str,
-                  learning_rate: float,
-                  clip_factor: float = 3.0,  
-                  noise_multiplier: float = 0.01,
-                  privacy_epsilon: float = 10.0,
-                  privacy_delta: float = 1e-3) -> Dict:
+                   global_model_path: str,
+                   learning_rate: float,
+                   clip_factor: float = 3.0,
+                   noise_multiplier: float = 0.01,
+                   privacy_epsilon: float = 10.0,
+                   privacy_delta: float = 1e-3) -> Dict:
     """Clip-and-noise defense against backdoor attacks
     
     Args:
@@ -372,7 +372,7 @@ def clip_and_noise(updates: List[str],
     # Load updates and model
     client_updates = []
     update_norms = []
-    
+
     # Architecture is always SimCLR, hardcoding "cifar10" just for simplicity
     global_model = get_encoder_architecture(type('args', (object,), {'pretraining_dataset': 'cifar10'})).cuda()
 
@@ -380,7 +380,7 @@ def clip_and_noise(updates: List[str],
     if global_model_path != 'fs':
         checkpoint = torch.load(global_model_path)
         global_model.load_state_dict(checkpoint['state_dict'])
-        print("===== LOADED GLOBAL MODEL =====")     
+        print("===== LOADED GLOBAL MODEL =====")
     else:
         print("===== INITIALIZED GLOBAL MODEL =====")
 
@@ -389,16 +389,16 @@ def clip_and_noise(updates: List[str],
     for update_path in updates:
         update = torch.load(update_path)
         state = update['state_dict'] if isinstance(update, dict) and 'state_dict' in update else update
-        
+
         # Compute update
         for key in state.keys():
             if key in state and key in global_state:
-                 state[key] = (state[key] - global_state[key]) 
+                state[key] = (state[key] - global_state[key])
             else:
                 raise KeyError(f"Key {key} not found in update model")
-        
+
         client_updates.append(state)
-        
+
         # Compute norm (of weight parameters only, excluding batchnorm layers) on GPU but move result to CPU (memory efficient)
         update_vec = parameters_dict_to_vector_flt(extract_weights_only(state))
         update_norms.append(torch.norm(update_vec).cpu())
@@ -422,7 +422,7 @@ def clip_and_noise(updates: List[str],
 
         if not is_outlier:
             valid_indices.append(i)
-        
+
     print(f"\nMin norm: {torch.min(update_norms):.4f}")
     print(f"Max norm: {torch.max(update_norms):.4f}")
     print(f"Mean norm: {torch.mean(update_norms):.4f}")
@@ -433,7 +433,7 @@ def clip_and_noise(updates: List[str],
     valid_updates = [client_updates[i] for i in valid_indices]
     valid_norms = update_norms[valid_indices]
     n_clients = len(valid_updates)
-    
+
     # Clip based on valid updates only!
     clip_threshold = torch.median(valid_norms)
 
@@ -444,23 +444,23 @@ def clip_and_noise(updates: List[str],
 
     # OR (!!!) use heuristic approach:
     #noise_scale = noise_multiplier * (clip_threshold / n_clients)
-    
+
     print(f"Noise scale: {noise_scale:.4f}")
-    
+
     # Load global model
     #global_state = torch.load(global_model)
     #global_state = global_state['state_dict'] if isinstance(global_state, dict) and 'state_dict' in global_state else global_state
-    
+
     # Process updates one at a time to save memory
     aggregated = {}
     for key in global_state:
         #if 'num_batches_tracked' in key:
         #    aggregated[key] = client_updates[0][key]
         #    continue
-        
+
         # Initialize accumulator on CPU
         update_sum = torch.zeros_like(global_state[key], dtype=torch.float32).cpu()
-        
+
         # Process each update
         for update, norm in zip(valid_updates, valid_norms):
             # Calculate scaling factor for clipping
@@ -468,19 +468,19 @@ def clip_and_noise(updates: List[str],
             # Convert to float32 before scaling
             update_tensor = update[key].to(torch.float32)
             update_sum += (update_tensor * scale).cpu()
-            
+
         # Move final result to GPU only when needed
-        aggregated[key] = (global_state[key].to(torch.float32) + ((learning_rate*update_sum) / n_clients).cuda().to(global_state[key].dtype)) 
-        
+        aggregated[key] = (global_state[key].to(torch.float32) + ((learning_rate*update_sum) / n_clients).cuda().to(global_state[key].dtype))
+
         # Add noise (only to weights)
         if should_include_key(key):
             noise = torch.randn_like(aggregated[key], dtype=torch.float32) * noise_scale
             aggregated[key] = (aggregated[key].to(torch.float32) + noise).to(global_state[key].dtype)
-            
+
         # Clear some memory
         del update_sum
         torch.cuda.empty_cache()
-            
+
     return aggregated
 
 if __name__ == "__main__":
@@ -508,7 +508,7 @@ if __name__ == "__main__":
     '''
     # Learning rate for FedAvg
     learning_rate = 0.25 # 0.25 default, 1 proof of concept  
-    
+
     # Perform model averaging with FedAvg
     try:
         averaged_model = fed_avg(global_model_path, updates, output_path, learning_rate)

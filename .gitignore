@@ -1,5 +1,5 @@
 # Data directory (too heavy to put on git)
-data/
+reference/data/
 
 # Output directory (models, logs, etc.)
 output/

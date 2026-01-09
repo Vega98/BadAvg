@@ -14,29 +14,29 @@ from datasets import get_shadow_dataset
 from badaggregation import BadAggregation
 from aggregation_experiments import should_include_key
 
-def run_federated_attack(encoder_usage_info: str = 'cifar10', 
-                        shadow_dataset: str = 'cifar10',
-                        downstream_dataset: str = 'stl10',
-                        trigger: str = 'trigger_pt_white_21_10_ap_replace.npz',
-                        reference_path: str = 'truck',
-                        clean_encoder: str = '',
-                        num_clients: int = 10, #proof of concept: 2 default 10
-                        fed_lr: float = 0.25, #proof of concept:1 defaylt 0.25
-                        batch_size: int = 256,
-                        lr: float = 1e-3,
-                        lambda1: float = 1.0,
-                        lambda2: float = 1.0,
-                        epochs: int = 1,
-                        reference_label: int = 0, # Default 0 also in badencoder.py
-                        name: str = 'badaggregation_test',
-                        clean_local: str = '',
-                        clipnoise: bool = False,
-                        neurotoxin_mask: str = None,
-                        #previous_global_model: str = None,
-                        output_dir: str = '.',
-                        ) -> str:
+def run_federated_attack(encoder_usage_info: str = 'cifar10',
+                         shadow_dataset: str = 'cifar10',
+                         downstream_dataset: str = 'stl10',
+                         trigger: str = 'trigger_pt_white_21_10_ap_replace.npz',
+                         reference_path: str = 'truck',
+                         clean_encoder: str = '',
+                         num_clients: int = 10, #proof of concept: 2 default 10
+                         fed_lr: float = 0.25, #proof of concept:1 defaylt 0.25
+                         batch_size: int = 256,
+                         lr: float = 1e-3,
+                         lambda1: float = 1.0,
+                         lambda2: float = 1.0,
+                         epochs: int = 1,
+                         reference_label: int = 0, # Default 0 also in badencoder.py
+                         name: str = 'badaggregation_test',
+                         clean_local: str = '',
+                         clipnoise: bool = False,
+                         neurotoxin_mask: str = None,
+                         #previous_global_model: str = None,
+                         output_dir: str = '.',
+                         ) -> str:
     """Run federated BadEncoder attack with specified parameters"""
-    
+
     # Packaging args for get_shadow_dataset (#1) and get_encoder_architecture_usage (#2) routines
     args = argparse.Namespace(
         reference_file=reference_path,#1
@@ -49,27 +49,27 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
 
     # Print args
     print(args)
-    
+
     # Create directories
     pretrained_encoder = clean_encoder
     #pretrained_encoder = f'./output/{clean_encoder}'
     results_dir = os.path.join(output_dir, "temp")
     os.makedirs(results_dir, exist_ok=True)
-    
+
     # Create data loader (testing unused)
     shadow_data, memory_data, test_data_clean, test_data_backdoor = get_shadow_dataset(args)
-    train_loader = DataLoader(shadow_data, batch_size=batch_size, 
-                            shuffle=True, num_workers=4, pin_memory=True, 
-                            drop_last=True)
+    train_loader = DataLoader(shadow_data, batch_size=batch_size,
+                              shuffle=True, num_workers=4, pin_memory=True,
+                              drop_last=True)
 
     # Initialize models
     clean_global_model = get_encoder_architecture_usage(args).cuda()
     clean_local_model = get_encoder_architecture_usage(args).cuda()
     poisoned_local_model = get_encoder_architecture_usage(args).cuda()
 
-    
 
-    
+
+
     if pretrained_encoder:
         checkpoint = torch.load(pretrained_encoder)
         #poisoned = torch.load(poisoned_model)
@@ -80,7 +80,7 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
         # Load also the clean local model of the malicious client
         clean = torch.load(clean_local)
         clean_local_model.load_state_dict(clean['state_dict'])
-    
+
     # Initialize attack and optimizer
     fed_attacker = BadAggregation(
         num_clients=num_clients,
@@ -98,10 +98,10 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
 
     # Option 2: exponential decay (from 3.0 to 1.5) #tolerance = 1.5 / 1.05
     tolerances = 1.05 + (3.0 - 1.05) * np.exp(-5 * np.arange(epochs) / epochs)
-    
+
     # Training loop
     for epoch in range(1, epochs+1):
-        print("=================================================")     
+        print("=================================================")
 
         # Soft reset the norm for first n-2 epochs (last 1 epochs is hard constraining during training)
         #if clipnoise and (epoch < epochs-1):
@@ -138,7 +138,7 @@ def run_federated_attack(encoder_usage_info: str = 'cifar10',
         state_dict = poisoned_local_model.state_dict()
         if epoch % epochs == 0:
 
-            
+
 
             torch.save({
                 'epoch': epochs,
@@ -168,7 +168,7 @@ def main():
     parser.add_argument('--num_clients', default=10, type=int)
     parser.add_argument('--fed_lr', default=0.25, type=float)
     args = parser.parse_args()
-    
+
     path = run_federated_attack(**vars(args))
 
 if __name__ == '__main__':
