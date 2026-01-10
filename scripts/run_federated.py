@@ -33,10 +33,10 @@ TRIGGER_PATH = f"{BASE_DIR}trigger/trigger_pt_white_21_10_ap_replace.npz"  # Tri
 REFERENCE_DIR = f"{BASE_DIR}reference"         # Directory containing reference images
 
 # Main parameters (change at will)
-BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
-SKIP_ROUNDS = 10 # -1 to evaluate all rounds, N to evaluate every N rounds
+BAD_ROUNDS = 1 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
+SKIP_ROUNDS = -1 # -1 to evaluate all rounds, N to evaluate every N rounds
 PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
-SHADOW_DATASET = "stl10" # Shadow dataset for attack (either "cifar10" or "stl10")
+SHADOW_DATASET = "stl10" #  dataset for attack (either "cifar10" or "stl10")
 ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
 
 CHECKPOINT = None  # Set to None if starting from scratch # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
@@ -97,7 +97,7 @@ def compute_derived_settings():
         raise NotImplementedError(f"Unsupported downstream dataset {DOWNSTREAM_DATASET}")
 
     # Recompute OUTPUT_DIR in case related globals changed
-    OUTPUT_DIR = f"{BASE_DIR}/output/badavg_{DOWNSTREAM_DATASET}_{DATASET_DISTRIBUTION}_def{DEFENSE}"
+    OUTPUT_DIR = f"{BASE_DIR}/outputSCRATCH/badavg_{DOWNSTREAM_DATASET}_{DATASET_DISTRIBUTION}_def{DEFENSE}"
 
 
 # Compute derived settings at import time to preserve previous behavior
@@ -644,12 +644,12 @@ def main(dataset_distribution=None,
 
 
 if __name__ == "__main__":
-    for dataset_distribution in ["iid", "dirichlet"]:
-        for downstream_dataset in ["cifar10", "stl10"]:
+    for dataset_distribution in ["iid"]: #, "dirichlet"
+        for downstream_dataset in ["cifar10", "svhn", "gtsrb"]:
             for defense in [0, 1]:
-                starting_clean_rounds = 200
-                max_attack_round = 401
-                num_rounds = 600
+                starting_clean_rounds = 0 #TODO Set it up to 200 for final experiments
+                max_attack_round = 100
+                num_rounds = 200
                 print(f"\n=== Running experiment with settings: dataset_distribution={dataset_distribution}, downstream_dataset={downstream_dataset}, defense={defense}, starting_clean_rounds={starting_clean_rounds}, max_attack_round={max_attack_round}, num_rounds={num_rounds} ===\n")
                 main(
                     dataset_distribution=dataset_distribution,
