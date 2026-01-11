@@ -36,7 +36,7 @@ REFERENCE_DIR = f"{BASE_DIR}reference"         # Directory containing reference 
 BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
 SKIP_ROUNDS = 10 # -1 to evaluate all rounds, N to evaluate every N rounds
 PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
-SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
+SHADOW_DATASET = "stl10" # Shadow dataset for attack (either "cifar10" or "stl10")
 ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
 
 CHECKPOINT = None  # Set to None if starting from scratch # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
