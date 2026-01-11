@@ -19,11 +19,11 @@ from federated_round import federated_poison_round, federated_round
 
 """ EDIT THIS KNOBS TO CHANGE EXPERIMENT SETTINGS """
 DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
-DOWNSTREAM_DATASET = "stl10" # Dataset for evaluation
-DEFENSE = 1 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
-STARTING_CLEAN_ROUNDS = 200
-MAX_ATTACK_ROUND = 401
-NUM_ROUNDS = 600 # Total number of federated rounds
+DOWNSTREAM_DATASET = "gtsrb" # Dataset for evaluation
+DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
+STARTING_CLEAN_ROUNDS = 1
+MAX_ATTACK_ROUND = 3
+NUM_ROUNDS = 3 # Total number of federated rounds
 
 
 # === BASE PATHS (Attention this knobs when moving to a different machine) ===
@@ -36,7 +36,7 @@ REFERENCE_DIR = f"{BASE_DIR}reference"         # Directory containing reference 
 BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
 SKIP_ROUNDS = 10 # -1 to evaluate all rounds, N to evaluate every N rounds
 PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
-SHADOW_DATASET = "stl10" # Shadow dataset for attack (either "cifar10" or "stl10")
+SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
 ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
 
 CHECKPOINT = None  # Set to None if starting from scratch # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
@@ -49,7 +49,7 @@ CLIENT_EPOCHS = 5 # Number of local epochs for each client during pre-training
 BACKDOOR_EPOCHS = 10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
 FEDAVG_LEARNING_RATE = 0.25 # Learning rate for FedAvg
 TRAINING_GPU_ID = 0 # GPU ID for training (if not sure, leave at 0)
-EVAL_GPU_ID = 1 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
+EVAL_GPU_ID = 0 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
 DOWNSTREAM_EPOCHS = "progressive" # Set either 'progressive' or fixed number. Number of epochs to train downstream classifier during evaluation after each round (higher = slightly better accuracy, but slower)
 HARDCAP = 1000 # If using progressive downstream epochs, this is the hard cap for max epochs
 
@@ -98,6 +98,8 @@ def compute_derived_settings():
 
     # Recompute OUTPUT_DIR in case related globals changed
     OUTPUT_DIR = f"{BASE_DIR}/output/badavg_{DOWNSTREAM_DATASET}_{DATASET_DISTRIBUTION}_def{DEFENSE}"
+    #debug
+    #print("DEBUG: REFERENCE_PATH =", REFERENCE_PATH, ", REFERENCE_LABEL =", REFERENCE_LABEL)
 
 
 # Compute derived settings at import time to preserve previous behavior
@@ -186,7 +188,8 @@ def evaluate_model(model_path, round_num, output_dir, downstream_epochs, gpu):
     os.makedirs(log_dir, exist_ok=True)
 
     eval_log = os.path.join(log_dir, f'eval_round_{round_num}.txt')
-
+    #debug
+    #print("DEBUG: REFERENCE_PATH =", REFERENCE_PATH, ", REFERENCE_LABEL =", REFERENCE_LABEL)
     # Run evaluation script (parameters are hardcoded for cifar10 pretrain and stl10 downstream)
     cmd = f"""python3 training_downstream_classifier.py \
         --dataset {DOWNSTREAM_DATASET} \
@@ -195,6 +198,7 @@ def evaluate_model(model_path, round_num, output_dir, downstream_epochs, gpu):
         --reference_label {REFERENCE_LABEL} \
         --trigger_file {TRIGGER_PATH} \
         --reference_file {REFERENCE_PATH} \
+        --data_dir {DATA_DIR} \
         --gpu {gpu} \
         --nn_epochs {downstream_epochs} \
         > {eval_log}"""
@@ -603,7 +607,9 @@ def main(dataset_distribution=None,
                     downstream_epochs = DOWNSTREAM_EPOCHS
 
                     # Onlu submit for eval if we are not skipping this round
-                should_evaluate = (SKIP_ROUNDS == -1) or ((round_num + 1) % SKIP_ROUNDS == 0)
+                # Always evaluate rounds within the attack window for better monitoring
+                in_attack_window = round_num > STARTING_CLEAN_ROUNDS and round_num < MAX_ATTACK_ROUND
+                should_evaluate = (SKIP_ROUNDS == -1) or ((round_num + 1) % SKIP_ROUNDS == 0) or in_attack_window
                 if should_evaluate:
                     eval_manager.submit_evaluation(stable_model_path, round_num, downstream_epochs, is_poison_round, avg_loss, avg_accuracy)
                 else:
@@ -644,15 +650,15 @@ def main(dataset_distribution=None,
 
 
 if __name__ == "__main__":
-    for dataset_distribution in ["iid", "dirichlet"]:
-        for downstream_dataset in ["cifar10", "stl10"]:
+    #for dataset_distribution in ["iid", "dirichlet"]: #if using stl-10 as pretrain, dirichlet partitions are not available (unlabeled data)
+        for downstream_dataset in ["gtsrb", "svhn", "cifar10"]:
             for defense in [0, 1]:
                 starting_clean_rounds = 200
                 max_attack_round = 401
                 num_rounds = 600
-                print(f"\n=== Running experiment with settings: dataset_distribution={dataset_distribution}, downstream_dataset={downstream_dataset}, defense={defense}, starting_clean_rounds={starting_clean_rounds}, max_attack_round={max_attack_round}, num_rounds={num_rounds} ===\n")
+                print(f"\n=== Running experiment with settings: dataset_distribution=iid, downstream_dataset={downstream_dataset}, defense={defense}, starting_clean_rounds={starting_clean_rounds}, max_attack_round={max_attack_round}, num_rounds={num_rounds} ===\n")
                 main(
-                    dataset_distribution=dataset_distribution,
+                    dataset_distribution="iid",
                     downstream_dataset=downstream_dataset,
                     defense=defense,
                     starting_clean_rounds=starting_clean_rounds,

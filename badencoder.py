@@ -196,6 +196,7 @@ if __name__ == '__main__':
     parser.add_argument('--scale_factor', type=int, help='scale factor for the weights, if set then we are doing BAGEL')
     parser.add_argument('--naive', type=int, help='if set (1) then we are computing the local encoder using Bagdasaryan method')
     parser.add_argument('--clean_local', type=str, help='Clean local encoder for train-and-scale in Bagdasaryan method')
+    parser.add_argument('--data_dir', default='./data', type=str, help='path to the data directory') 
     args = parser.parse_args()
 
     # Set the seed and determine the GPU
@@ -210,7 +211,7 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
 
     # Specify the pre-training data directory
-    args.data_dir = f'reference/data/{args.shadow_dataset.split("_")[0]}/'
+    args.data_dir = f'{args.data_dir}/{args.shadow_dataset.split("_")[0]}/'
     args.knn_k = 200
     args.knn_t = 0.5
     args.reference_label = 0
