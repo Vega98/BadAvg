@@ -1,5 +1,6 @@
 # Data directory (too heavy to put on git)
-reference/data/
+data/*
+!data/.gitkeep
 
 # Output directory (models, logs, etc.)
 output/

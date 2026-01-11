@@ -36,6 +36,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', default=64, type=int, metavar='N', help='mini-batch size')
     ## note that the reference_file is not needed to train a downstream classifier
     parser.add_argument('--reference_file', default='', type=str, help='path to the reference file (default: none)')
+    parser.add_argument('--data_dir', default='./data', type=str, help='path to the data directory')  
     args = parser.parse_args()
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     assert args.reference_label >= 0, 'Enter the correct target class'
 
 
-    args.data_dir = f'reference/data/{args.dataset}/'
+    args.data_dir = f'{args.data_dir}/{args.dataset}/'
     target_dataset, train_data, test_data_clean, test_data_backdoor = get_dataset_evaluation(args)
 
 
