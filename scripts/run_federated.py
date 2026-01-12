@@ -21,8 +21,8 @@ from federated_round import federated_poison_round, federated_round
 DATASET_DISTRIBUTION = "iid"  # Dataset distribution among clients ("iid" or "dirichlet" for non-iid)
 DOWNSTREAM_DATASET = "gtsrb" # Dataset for evaluation
 DEFENSE = 0 # 0 for no defense, 1 for clip&noise (if attack is 0, this is ignored)
-STARTING_CLEAN_ROUNDS = 1
-MAX_ATTACK_ROUND = 3
+STARTING_CLEAN_ROUNDS = 1 # Number of initial clean rounds before starting attack
+MAX_ATTACK_ROUND = 1 # Maximum round to perform attack
 NUM_ROUNDS = 3 # Total number of federated rounds
 
 
@@ -34,7 +34,7 @@ REFERENCE_DIR = f"{BASE_DIR}reference"         # Directory containing reference 
 
 # Main parameters (change at will)
 BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
-SKIP_ROUNDS = 10 # -1 to evaluate all rounds, N to evaluate every N rounds
+SKIP_ROUNDS = 5 # -1 to evaluate all rounds, N to evaluate every N rounds
 PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
 SHADOW_DATASET = "stl10" # Shadow dataset for attack (either "cifar10" or "stl10")
 ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
@@ -49,13 +49,13 @@ CLIENT_EPOCHS = 5 # Number of local epochs for each client during pre-training
 BACKDOOR_EPOCHS = 10 # Number of local epochs for each attacker during backdoor training (only for poison rounds)
 FEDAVG_LEARNING_RATE = 0.25 # Learning rate for FedAvg
 TRAINING_GPU_ID = 0 # GPU ID for training (if not sure, leave at 0)
-EVAL_GPU_ID = 0 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
+EVAL_GPU_ID = 1 # GPU ID for evaluation (can be same as TRAINING_GPU_ID if only one GPU is available, consider that evaluation happens in parallel with training)
 DOWNSTREAM_EPOCHS = "progressive" # Set either 'progressive' or fixed number. Number of epochs to train downstream classifier during evaluation after each round (higher = slightly better accuracy, but slower)
 HARDCAP = 1000 # If using progressive downstream epochs, this is the hard cap for max epochs
 
 EVAL_ONLY = False # If True, skips training and only evaluates models in MODELS_DIR
 MODELS_DIR = "" # Directory containing models to evaluate (required if EVAL_ONLY is True)
-OUTPUT_DIR = f"{BASE_DIR}/output/badavg_fromscratch_500_gtsrb_{DOWNSTREAM_DATASET}_{DATASET_DISTRIBUTION}_def{DEFENSE}" # Output directory for logs, models, plots
+OUTPUT_DIR = f"{BASE_DIR}/output/badavg_{DOWNSTREAM_DATASET}_{DATASET_DISTRIBUTION}_def{DEFENSE}" # Output directory for logs, models, plots
 
 
 # =============================================================================
@@ -191,7 +191,7 @@ def evaluate_model(model_path, round_num, output_dir, downstream_epochs, gpu):
     #debug
     #print("DEBUG: REFERENCE_PATH =", REFERENCE_PATH, ", REFERENCE_LABEL =", REFERENCE_LABEL)
     # Run evaluation script (parameters are hardcoded for cifar10 pretrain and stl10 downstream)
-    cmd = f"""python3 training_downstream_classifier.py \
+    cmd = f"""{sys.executable} training_downstream_classifier.py \
         --dataset {DOWNSTREAM_DATASET} \
         --encoder {model_path} \
         --encoder_usage_info {PRETRAIN_DATASET} \
@@ -654,7 +654,7 @@ if __name__ == "__main__":
         for downstream_dataset in ["gtsrb", "svhn", "cifar10"]:
             for defense in [0, 1]:
                 starting_clean_rounds = 200
-                max_attack_round = 401
+                max_attack_round = 400
                 num_rounds = 600
                 print(f"\n=== Running experiment with settings: dataset_distribution=iid, downstream_dataset={downstream_dataset}, defense={defense}, starting_clean_rounds={starting_clean_rounds}, max_attack_round={max_attack_round}, num_rounds={num_rounds} ===\n")
                 main(
