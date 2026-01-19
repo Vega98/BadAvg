@@ -35,8 +35,8 @@ REFERENCE_DIR = f"{BASE_DIR}reference"         # Directory containing reference 
 # Main parameters (change at will)
 BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
 SKIP_ROUNDS = 5 # -1 to evaluate all rounds, N to evaluate every N rounds
-PRETRAIN_DATASET = "stl10" # Dataset for pre-training (either "cifar10" or "stl10")
-SHADOW_DATASET = "stl10" # Shadow dataset for attack (either "cifar10" or "stl10")
+PRETRAIN_DATASET = "cifar10" # Dataset for pre-training (either "cifar10" or "stl10")
+SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
 ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
 
 CHECKPOINT = None  # Set to None if starting from scratch # If starting experiment from a checkpoint, put the path to the checkpoint .pth file here (otherwise None)
@@ -55,7 +55,7 @@ HARDCAP = 1000 # If using progressive downstream epochs, this is the hard cap fo
 
 EVAL_ONLY = False # If True, skips training and only evaluates models in MODELS_DIR
 MODELS_DIR = "" # Directory containing models to evaluate (required if EVAL_ONLY is True)
-OUTPUT_DIR = f"{BASE_DIR}/output/badavg_{DOWNSTREAM_DATASET}_{DATASET_DISTRIBUTION}_def{DEFENSE}" # Output directory for logs, models, plots
+OUTPUT_DIR = f"{BASE_DIR}/output/badavg_{DOWNSTREAM_DATASET}_{DATASET_DISTRIBUTION}_def{DEFENSE}_atk{ATTACK}" # Output directory for logs, models, plots
 
 
 # =============================================================================
@@ -97,7 +97,7 @@ def compute_derived_settings():
         raise NotImplementedError(f"Unsupported downstream dataset {DOWNSTREAM_DATASET}")
 
     # Recompute OUTPUT_DIR in case related globals changed
-    OUTPUT_DIR = f"{BASE_DIR}/output/badavg_{DOWNSTREAM_DATASET}_{DATASET_DISTRIBUTION}_def{DEFENSE}"
+    OUTPUT_DIR = f"{BASE_DIR}/output/badavg_{DOWNSTREAM_DATASET}_{DATASET_DISTRIBUTION}_def{DEFENSE}_atk{ATTACK}"
     #debug
     #print("DEBUG: REFERENCE_PATH =", REFERENCE_PATH, ", REFERENCE_LABEL =", REFERENCE_LABEL)
 
@@ -109,6 +109,7 @@ compute_derived_settings()
 # Helper to programmatically override top-level constants and recompute derived settings
 def apply_overrides(dataset_distribution=None,
                     downstream_dataset=None,
+                    attack = None,
                     defense=None,
                     starting_clean_rounds=None,
                     max_attack_round=None,
@@ -133,6 +134,9 @@ def apply_overrides(dataset_distribution=None,
         MAX_ATTACK_ROUND = int(max_attack_round)
     if num_rounds is not None:
         NUM_ROUNDS = int(num_rounds)
+    if attack is not None:
+        global ATTACK
+        ATTACK = int(attack)
 
     # Recompute any derived settings that depend on these globals
     compute_derived_settings()
@@ -374,6 +378,7 @@ class EvaluationManager:
 
 def main(dataset_distribution=None,
          downstream_dataset=None,
+         attack = None,
          defense=None,
          starting_clean_rounds=None,
          max_attack_round=None,
@@ -389,7 +394,7 @@ def main(dataset_distribution=None,
     """
     # Apply overrides (if any) so globals and derived settings are correct
     if any(v is not None for v in [dataset_distribution, downstream_dataset, defense, starting_clean_rounds, max_attack_round, num_rounds]):
-        apply_overrides(dataset_distribution, downstream_dataset, defense, starting_clean_rounds, max_attack_round, num_rounds)
+        apply_overrides(dataset_distribution, downstream_dataset, attack,  defense, starting_clean_rounds, max_attack_round, num_rounds)
 
     # Evaluation only mode, skip traning and evaluate existing checkpoints
     if EVAL_ONLY:
@@ -493,8 +498,6 @@ def main(dataset_distribution=None,
             pretrain_dataset=PRETRAIN_DATASET,
             shadow_dataset=SHADOW_DATASET
         )
-
-
 
 
         # Define checkpoint rounds (rounds for which we save all intermediate updates)
@@ -652,16 +655,19 @@ def main(dataset_distribution=None,
 if __name__ == "__main__":
     #for dataset_distribution in ["iid", "dirichlet"]: #if using stl-10 as pretrain, dirichlet partitions are not available (unlabeled data)
         for downstream_dataset in ["gtsrb", "svhn", "cifar10"]:
-            for defense in [0, 1]:
-                starting_clean_rounds = 200
-                max_attack_round = 400
-                num_rounds = 600
-                print(f"\n=== Running experiment with settings: dataset_distribution=iid, downstream_dataset={downstream_dataset}, defense={defense}, starting_clean_rounds={starting_clean_rounds}, max_attack_round={max_attack_round}, num_rounds={num_rounds} ===\n")
-                main(
-                    dataset_distribution="iid",
-                    downstream_dataset=downstream_dataset,
-                    defense=defense,
-                    starting_clean_rounds=starting_clean_rounds,
-                    max_attack_round=max_attack_round,
-                    num_rounds=num_rounds
-                )
+            for dataset_distribution in ["iid", "dirichlet"]:
+                for defense in [0, 1]:
+                    for attack in [1, 2, 3]:  # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
+                        starting_clean_rounds = 200
+                        max_attack_round = 400
+                        num_rounds = 500
+                        print(f"\n=== Running experiment with settings: dataset_distribution=iid, downstream_dataset={downstream_dataset}, defense={defense}, starting_clean_rounds={starting_clean_rounds}, max_attack_round={max_attack_round}, num_rounds={num_rounds} ===\n")
+                        main(
+                            dataset_distribution=dataset_distribution,
+                            downstream_dataset=downstream_dataset,
+                            attack = attack,
+                            defense=defense,
+                            starting_clean_rounds=starting_clean_rounds,
+                            max_attack_round=max_attack_round,
+                            num_rounds=num_rounds,
+                        )
