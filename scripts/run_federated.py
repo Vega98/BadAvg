@@ -654,13 +654,13 @@ def main(dataset_distribution=None,
 
 if __name__ == "__main__":
     #for dataset_distribution in ["iid", "dirichlet"]: #if using stl-10 as pretrain, dirichlet partitions are not available (unlabeled data)
-        for downstream_dataset in ["gtsrb", "svhn", "cifar10"]:
-            for dataset_distribution in ["iid", "dirichlet"]:
+        for downstream_dataset in [ "svhn", "cifar10"]:
+            for dataset_distribution in ["dirichlet", "iid" ]:
                 for defense in [0, 1]:
                     for attack in [1, 2, 3]:  # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
                         starting_clean_rounds = 200
-                        max_attack_round = 400
-                        num_rounds = 500
+                        max_attack_round = 300
+                        num_rounds = 400
                         print(f"\n=== Running experiment with settings: dataset_distribution=iid, downstream_dataset={downstream_dataset}, defense={defense}, starting_clean_rounds={starting_clean_rounds}, max_attack_round={max_attack_round}, num_rounds={num_rounds} ===\n")
                         main(
                             dataset_distribution=dataset_distribution,
