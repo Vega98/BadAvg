@@ -12,7 +12,10 @@ import queue
 import time
 from threading import Lock
 
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from federated_round import federated_poison_round, federated_round
@@ -34,7 +37,7 @@ REFERENCE_DIR = f"{BASE_DIR}reference"         # Directory containing reference 
 
 # Main parameters (change at will)
 BAD_ROUNDS = 10 # Run poison attack every BAD_ROUNDS rounds (-1 to disable)
-SKIP_ROUNDS = 5 # -1 to evaluate all rounds, N to evaluate every N rounds
+SKIP_ROUNDS = 10 # -1 to evaluate all rounds, N to evaluate every N rounds
 PRETRAIN_DATASET = "cifar10" # Dataset for pre-training (either "cifar10" or "stl10")
 SHADOW_DATASET = "cifar10" # Shadow dataset for attack (either "cifar10" or "stl10")
 ATTACK = 1 # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
@@ -600,6 +603,13 @@ def main(dataset_distribution=None,
                 else:
                     raise FileNotFoundError(f"Model file not found at {temp_model_path}")
 
+                # #delete models not needed anymore to save space
+                # if round_num -1  not in checkpoint_rounds:
+                #     prev_stable_model_path = os.path.join(models_dir, f"model_round{round_num-1}.pth")
+                #     if os.path.exists(prev_stable_model_path):
+                #         os.remove(prev_stable_model_path)
+                #         print(f"Deleted model from round {round_num-1} to save space.")
+
                 # Submit model for parallel evaluation with training metrics (non-blocking)
                 # Progressive downstream epochs: train the downstream classifier
                 # for longer as the encoder improves. Formula: epochs = (round * 5) / 2
@@ -612,7 +622,7 @@ def main(dataset_distribution=None,
                     # Onlu submit for eval if we are not skipping this round
                 # Always evaluate rounds within the attack window for better monitoring
                 in_attack_window = round_num > STARTING_CLEAN_ROUNDS and round_num < MAX_ATTACK_ROUND
-                should_evaluate = (SKIP_ROUNDS == -1) or ((round_num + 1) % SKIP_ROUNDS == 0) or in_attack_window
+                should_evaluate = (SKIP_ROUNDS == -1) or (round_num<20 and ((round_num + 1) % 5 == 0)) or ((round_num + 1) % SKIP_ROUNDS == 0) or (in_attack_window and ((round_num + 1) % 5 == 0)) or is_poison_round
                 if should_evaluate:
                     eval_manager.submit_evaluation(stable_model_path, round_num, downstream_epochs, is_poison_round, avg_loss, avg_accuracy)
                 else:
@@ -654,14 +664,14 @@ def main(dataset_distribution=None,
 
 if __name__ == "__main__":
     #for dataset_distribution in ["iid", "dirichlet"]: #if using stl-10 as pretrain, dirichlet partitions are not available (unlabeled data)
-        for downstream_dataset in [ "svhn", "cifar10"]:
+        for downstream_dataset in [ "stl10", "gtsrb" ]:
             for dataset_distribution in ["dirichlet", "iid" ]:
-                for defense in [0, 1]:
+                for defense in [0]:
                     for attack in [1, 2, 3]:  # 0 for no attack (clean federated experiment), 1 for BadAvg, 2 for BAGEL, 3 for Naive
                         starting_clean_rounds = 200
                         max_attack_round = 300
                         num_rounds = 400
-                        print(f"\n=== Running experiment with settings: dataset_distribution=iid, downstream_dataset={downstream_dataset}, defense={defense}, starting_clean_rounds={starting_clean_rounds}, max_attack_round={max_attack_round}, num_rounds={num_rounds} ===\n")
+                        print(f"\n=== Running experiment with settings: dataset_distribution={dataset_distribution}, downstream_dataset={downstream_dataset}, defense={defense}, starting_clean_rounds={starting_clean_rounds}, max_attack_round={max_attack_round}, num_rounds={num_rounds} ===\n")
                         main(
                             dataset_distribution=dataset_distribution,
                             downstream_dataset=downstream_dataset,
